@@ -1,0 +1,460 @@
+{% extends 'base/layout.html' %}
+
+{% block title %}Name Generator{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-md-8 offset-md-2">
+
+    <div class="card">
+      <div class="card-header">
+        <h5 class="card-title mb-0">
+          <i class="mdi mdi-tag-text-outline me-2"></i>IT-System Name Generator
+        </h5>
+      </div>
+      <div class="card-body">
+
+        {# Allgemeine Fehlermeldungen #}
+        {% if form.non_field_errors %}
+          <div class="alert alert-danger" role="alert">
+            {% for error in form.non_field_errors %}
+              <div>{{ error }}</div>
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        <form method="post" novalidate>
+          {% csrf_token %}
+
+          {# ── Systemtyp ──────────────────────────────────────────────── #}
+          <div class="mb-4">
+            <label for="{{ form.system_type.id_for_label }}" class="form-label fw-semibold">
+              Systemtyp <span class="text-danger">*</span>
+            </label>
+            {{ form.system_type }}
+            {% if form.system_type.errors %}
+              <div class="invalid-feedback d-block">{{ form.system_type.errors|join:", " }}</div>
+            {% endif %}
+          </div>
+
+          {# ── Netzwerkgerät ───────────────────────────────────────────── #}
+          <fieldset id="section-netzwerkgeraet" class="ng-section border rounded p-3 mb-4" style="display:none">
+            <legend class="float-none w-auto px-2 fs-6 fw-semibold">Netzwerkgerät</legend>
+            <p class="text-muted small mb-3">
+              Schema: <code>[STANDORT]-[TYP]-[FUNKTION][NUMMER][RACKID]</code> &mdash; genau 15 Zeichen<br>
+              Beispiel: <code>RZ1-SW-COR01NGV</code>
+            </p>
+
+            <div class="row g-3">
+              <div class="col-md-3">
+                <label for="{{ form.ng_standort.id_for_label }}" class="form-label">Standort</label>
+                {{ form.ng_standort }}
+                {% if form.ng_standort.errors %}
+                  <div class="invalid-feedback d-block">{{ form.ng_standort.errors|join:", " }}</div>
+                {% endif %}
+                <div class="form-text">RZ1 · HAU · NEB · B01</div>
+              </div>
+
+              <div class="col-md-3">
+                <label for="{{ form.ng_typ.id_for_label }}" class="form-label">Gerätetyp</label>
+                {{ form.ng_typ }}
+                {% if form.ng_typ.errors %}
+                  <div class="invalid-feedback d-block">{{ form.ng_typ.errors|join:", " }}</div>
+                {% endif %}
+                <div class="form-text">SW · FW · STO · AP</div>
+              </div>
+
+              <div class="col-md-3" id="ng-funktion-wrapper">
+                <label for="{{ form.ng_funktion.id_for_label }}" class="form-label">Funktion</label>
+                {{ form.ng_funktion }}
+                {% if form.ng_funktion.errors %}
+                  <div class="invalid-feedback d-block">{{ form.ng_funktion.errors|join:", " }}</div>
+                {% endif %}
+                <div class="form-text" id="ng-funktion-hint">SW: COR·DIS·ACC·EDG</div>
+              </div>
+
+              <div class="col-md-3">
+                <label for="{{ form.ng_rackid.id_for_label }}" class="form-label">Rack-ID</label>
+                {{ form.ng_rackid }}
+                {% if form.ng_rackid.errors %}
+                  <div class="invalid-feedback d-block">{{ form.ng_rackid.errors|join:", " }}</div>
+                {% endif %}
+                <div class="form-text" id="ng-rackid-hint">SW/FW: max. 3 Zeichen · STO: max. 2 · AP: max. 6</div>
+              </div>
+            </div>
+          </fieldset>
+
+          {# ── Server ──────────────────────────────────────────────────── #}
+          <fieldset id="section-server" class="ng-section border rounded p-3 mb-4" style="display:none">
+            <legend class="float-none w-auto px-2 fs-6 fw-semibold">Physischer Server</legend>
+            <p class="text-muted small mb-3">
+              Schema: <code>[STANDORT]-SRV-[ZWECK][NUMMER]</code> &mdash; 14 Zeichen<br>
+              Beispiel: <code>RZ1-SRV-ADDS01</code>
+            </p>
+
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label for="{{ form.srv_standort.id_for_label }}" class="form-label">Standort</label>
+                {{ form.srv_standort }}
+                {% if form.srv_standort.errors %}
+                  <div class="invalid-feedback d-block">{{ form.srv_standort.errors|join:", " }}</div>
+                {% endif %}
+              </div>
+
+              <div class="col-md-4">
+                <label for="{{ form.srv_zweck.id_for_label }}" class="form-label">Zweck</label>
+                {{ form.srv_zweck }}
+                {% if form.srv_zweck.errors %}
+                  <div class="invalid-feedback d-block">{{ form.srv_zweck.errors|join:", " }}</div>
+                {% endif %}
+                <div class="form-text">ADDS · SQLP · FILE · MONI · SAP · EXCH · HYPV</div>
+              </div>
+
+              <div class="col-md-4" id="srv-zweck-frei-wrapper" style="display:none">
+                <label for="{{ form.srv_zweck_frei.id_for_label }}" class="form-label">Freitext-Zweck</label>
+                {{ form.srv_zweck_frei }}
+                {% if form.srv_zweck_frei.errors %}
+                  <div class="invalid-feedback d-block">{{ form.srv_zweck_frei.errors|join:", " }}</div>
+                {% endif %}
+                <div class="form-text">Max. 4 Zeichen, A–Z / 0–9</div>
+              </div>
+            </div>
+          </fieldset>
+
+          {# ── Desktop-PC ──────────────────────────────────────────────── #}
+          <fieldset id="section-pc" class="ng-section border rounded p-3 mb-4" style="display:none">
+            <legend class="float-none w-auto px-2 fs-6 fw-semibold">Desktop-PC</legend>
+            <p class="text-muted small mb-3">
+              Schema: <code>[STANDORT]-PC-[KENNUNG]</code> &mdash; max. 15 Zeichen<br>
+              Beispiel: <code>HAU-PC-MARK01</code> oder <code>HAU-PC-INV0042</code>
+            </p>
+
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label for="{{ form.pc_standort.id_for_label }}" class="form-label">Standort</label>
+                {{ form.pc_standort }}
+                {% if form.pc_standort.errors %}
+                  <div class="invalid-feedback d-block">{{ form.pc_standort.errors|join:", " }}</div>
+                {% endif %}
+              </div>
+
+              <div class="col-md-4">
+                <label for="{{ form.pc_kennung_type.id_for_label }}" class="form-label">Kennungstyp</label>
+                {{ form.pc_kennung_type }}
+                {% if form.pc_kennung_type.errors %}
+                  <div class="invalid-feedback d-block">{{ form.pc_kennung_type.errors|join:", " }}</div>
+                {% endif %}
+              </div>
+
+              <div class="col-md-4">
+                <label for="{{ form.pc_kennung.id_for_label }}" class="form-label" id="pc-kennung-label">
+                  Abteilungskürzel
+                </label>
+                {{ form.pc_kennung }}
+                {% if form.pc_kennung.errors %}
+                  <div class="invalid-feedback d-block">{{ form.pc_kennung.errors|join:", " }}</div>
+                {% endif %}
+                <div class="form-text" id="pc-kennung-hint">max. 4 Zeichen, Nummer wird automatisch vergeben</div>
+              </div>
+            </div>
+          </fieldset>
+
+          {# ── Notebook ────────────────────────────────────────────────── #}
+          <fieldset id="section-notebook" class="ng-section border rounded p-3 mb-4" style="display:none">
+            <legend class="float-none w-auto px-2 fs-6 fw-semibold">Notebook</legend>
+            <p class="text-muted small mb-3">
+              Schema: <code>NB-[BENUTZERKUERZEL]</code> &mdash; max. 15 Zeichen<br>
+              Beispiel: <code>NB-SCHMIDTH</code>
+            </p>
+
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label for="{{ form.nb_kuerzel.id_for_label }}" class="form-label">Benutzerkürzel</label>
+                {{ form.nb_kuerzel }}
+                {% if form.nb_kuerzel.errors %}
+                  <div class="invalid-feedback d-block">{{ form.nb_kuerzel.errors|join:", " }}</div>
+                {% endif %}
+                <div class="form-text">Nur A–Z und 0–9, max. 12 Zeichen (z. B. SCHMIDTH)</div>
+              </div>
+            </div>
+          </fieldset>
+
+          {# ── Virtuelle Maschine ──────────────────────────────────────── #}
+          <fieldset id="section-vm" class="ng-section border rounded p-3 mb-4" style="display:none">
+            <legend class="float-none w-auto px-2 fs-6 fw-semibold">Virtuelle Maschine</legend>
+            <p class="text-muted small mb-3">
+              Schema: <code>VM-[BEREICH]-[FUNKTION][NUMMER]</code> &mdash; 12 Zeichen<br>
+              Beispiel: <code>VM-APP-BMS01</code>
+            </p>
+
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label for="{{ form.vm_bereich.id_for_label }}" class="form-label">Bereich</label>
+                {{ form.vm_bereich }}
+                {% if form.vm_bereich.errors %}
+                  <div class="invalid-feedback d-block">{{ form.vm_bereich.errors|join:", " }}</div>
+                {% endif %}
+                <div class="form-text">APP · WEB · DB · ADM · RDS · DEV · TEST · PROD</div>
+              </div>
+
+              <div class="col-md-4">
+                <label for="{{ form.vm_funktion.id_for_label }}" class="form-label">Funktion</label>
+                {{ form.vm_funktion }}
+                {% if form.vm_funktion.errors %}
+                  <div class="invalid-feedback d-block">{{ form.vm_funktion.errors|join:", " }}</div>
+                {% endif %}
+                <div class="form-text">BMS · RDH · NOC · SQL · CRM · ERP · AD · FIL</div>
+              </div>
+
+              <div class="col-md-4" id="vm-funktion-frei-wrapper" style="display:none">
+                <label for="{{ form.vm_funktion_frei.id_for_label }}" class="form-label">Freitext-Funktion</label>
+                {{ form.vm_funktion_frei }}
+                {% if form.vm_funktion_frei.errors %}
+                  <div class="invalid-feedback d-block">{{ form.vm_funktion_frei.errors|join:", " }}</div>
+                {% endif %}
+                <div class="form-text">Max. 3 Zeichen, A–Z / 0–9</div>
+              </div>
+            </div>
+          </fieldset>
+
+          {# ── Submit ──────────────────────────────────────────────────── #}
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary" id="submit-btn" disabled>
+              <i class="mdi mdi-arrow-right-circle me-1"></i>Name generieren &amp; weiter
+            </button>
+            <a href="." class="btn btn-outline-secondary">
+              <i class="mdi mdi-refresh me-1"></i>Zurücksetzen
+            </a>
+          </div>
+
+        </form>
+      </div>{# card-body #}
+    </div>{# card #}
+
+    {# Abkürzungsreferenz #}
+    <div class="card mt-4">
+      <div class="card-header">
+        <h6 class="card-title mb-0">
+          <i class="mdi mdi-information-outline me-2"></i>Abkürzungsreferenz
+        </h6>
+      </div>
+      <div class="card-body">
+        <div class="row g-3 small">
+          <div class="col-md-4">
+            <strong>Standorte</strong>
+            <ul class="list-unstyled mb-0 mt-1">
+              <li><code>RZ1</code> — Rechenzentrum 1</li>
+              <li><code>HAU</code> — Hauptgebäude</li>
+              <li><code>NEB</code> — Nebengebäude</li>
+              <li><code>B01</code> — Gebäude 01</li>
+            </ul>
+          </div>
+          <div class="col-md-4">
+            <strong>Netzwerkgeräte – Funktion</strong>
+            <ul class="list-unstyled mb-0 mt-1">
+              <li><code>COR</code> Core &nbsp;<code>DIS</code> Distribution</li>
+              <li><code>ACC</code> Access &nbsp;<code>EDG</code> Edge</li>
+              <li><code>EXT</code> External (FW) &nbsp;<code>INT</code> Internal (FW)</li>
+              <li><code>SAN</code> Storage Area Network</li>
+              <li><code>NAS</code> Network Attached Storage</li>
+            </ul>
+          </div>
+          <div class="col-md-4">
+            <strong>Server – Zweck</strong>
+            <ul class="list-unstyled mb-0 mt-1">
+              <li><code>ADDS</code> Active Directory</li>
+              <li><code>SQLP</code> SQL Server</li>
+              <li><code>FILE</code> Dateiserver</li>
+              <li><code>MONI</code> Monitoring</li>
+              <li><code>SAP</code> SAP-System</li>
+              <li><code>EXCH</code> Exchange</li>
+              <li><code>HYPV</code> Hypervisor</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>{# col #}
+</div>{# row #}
+{% endblock content %}
+
+{% block javascript %}
+{{ block.super }}
+<script>
+(function () {
+  'use strict';
+
+  // Konfiguration: welche Optionen zeigt ng_funktion je nach ng_typ
+  const ngFunktionenByTyp = {
+    'SW':  ['COR', 'DIS', 'ACC', 'EDG'],
+    'FW':  ['EXT', 'INT'],
+    'STO': ['SAN', 'NAS'],
+    'AP':  [],
+  };
+
+  const ngFunktionHints = {
+    'SW':  'COR · DIS · ACC · EDG',
+    'FW':  'EXT · INT',
+    'STO': 'SAN · NAS',
+    'AP':  'Kein Funktionskürzel (automatisch)',
+  };
+
+  // Max. RACKID-Länge je Typ (Formel: 15 − len(Präfix) − 2, Präfix = STANDORT(3)+'-'+TYP+'-'+FUNKTION)
+  // Konservativster Wert je Typ (längster Standort = 3, längste Funktion = 3)
+  const ngRackidHints = {
+    'SW':  'max. 3 Zeichen (z. B. NGV)',
+    'FW':  'max. 3 Zeichen (z. B. NGV)',
+    'STO': 'max. 2 Zeichen (z. B. R1)',
+    'AP':  'max. 6 Zeichen (keine Funktion)',
+  };
+
+  // Alle Typ-Sektionen ausblenden, eine einblenden
+  function showSection(type) {
+    document.querySelectorAll('.ng-section').forEach(function (el) {
+      el.style.display = 'none';
+    });
+    if (type) {
+      const target = document.getElementById('section-' + type);
+      if (target) target.style.display = '';
+    }
+  }
+
+  // ng_funktion-Optionen nach ng_typ filtern
+  function updateNgFunktionen(typ) {
+    const select = document.getElementById('id_ng_funktion');
+    const wrapper = document.getElementById('ng-funktion-wrapper');
+    const hint = document.getElementById('ng-funktion-hint');
+
+    if (!select) return;
+
+    // Alle Optionen aus DOM entfernen
+    select.innerHTML = '';
+
+    if (typ === 'AP') {
+      // AP hat keine Funktion – Feld ausblenden
+      if (wrapper) wrapper.style.display = 'none';
+      return;
+    }
+
+    if (wrapper) wrapper.style.display = '';
+
+    // Platzhalter
+    const placeholder = document.createElement('option');
+    placeholder.value = '';
+    placeholder.textContent = '— Funktion —';
+    select.appendChild(placeholder);
+
+    const funktionen = ngFunktionenByTyp[typ] || [];
+    funktionen.forEach(function (f) {
+      const opt = document.createElement('option');
+      opt.value = f;
+      opt.textContent = f;
+      select.appendChild(opt);
+    });
+
+    if (hint) hint.textContent = ngFunktionHints[typ] || '';
+
+    const rackidHint = document.getElementById('ng-rackid-hint');
+    if (rackidHint) rackidHint.textContent = ngRackidHints[typ] || 'max. 3 Zeichen';
+  }
+
+  // PC-Kennungs-Label und -Hint dynamisch anpassen
+  function updatePcKennungLabel(kennungType) {
+    const label = document.getElementById('pc-kennung-label');
+    const hint = document.getElementById('pc-kennung-hint');
+    const input = document.getElementById('id_pc_kennung');
+
+    if (kennungType === 'inventar') {
+      if (label) label.textContent = 'Inventarnummer';
+      if (hint)  hint.textContent  = 'Direkt übernommen, keine Auto-Nummerierung';
+      if (input) input.placeholder = 'z. B. INV0042';
+    } else {
+      if (label) label.textContent = 'Abteilungskürzel';
+      if (hint)  hint.textContent  = 'max. 4 Zeichen, Nummer wird automatisch vergeben';
+      if (input) input.placeholder = 'z. B. MARK';
+    }
+  }
+
+  // Submit-Button aktivieren/deaktivieren je nach Auswahl
+  function updateSubmitBtn(type) {
+    const btn = document.getElementById('submit-btn');
+    if (btn) btn.disabled = !type;
+  }
+
+  // ── Event-Listener ────────────────────────────────────────────────────
+
+  const systemTypeSelect = document.getElementById('id_system_type');
+  if (systemTypeSelect) {
+    systemTypeSelect.addEventListener('change', function () {
+      const val = this.value;
+      showSection(val);
+      updateSubmitBtn(val);
+    });
+
+    // Bootstrap-Klasse für alle Select-Felder setzen
+    document.querySelectorAll('select').forEach(function (el) {
+      el.classList.add('form-select');
+    });
+    document.querySelectorAll('input[type=text]').forEach(function (el) {
+      el.classList.add('form-control');
+    });
+
+    // Initialisierung: beim Seitenladen (z. B. nach Validation-Fehler) Zustand wiederherstellen
+    const currentType = systemTypeSelect.value;
+    if (currentType) {
+      showSection(currentType);
+      updateSubmitBtn(currentType);
+    }
+  }
+
+  // ng_typ → ng_funktion filtern
+  const ngTypSelect = document.getElementById('id_ng_typ');
+  if (ngTypSelect) {
+    ngTypSelect.addEventListener('change', function () {
+      updateNgFunktionen(this.value);
+    });
+    // Beim Laden initialisieren
+    if (ngTypSelect.value) updateNgFunktionen(ngTypSelect.value);
+  }
+
+  // srv_zweck → Freitext-Feld ein-/ausblenden
+  const srvZweckSelect = document.getElementById('id_srv_zweck');
+  if (srvZweckSelect) {
+    srvZweckSelect.addEventListener('change', function () {
+      const wrapper = document.getElementById('srv-zweck-frei-wrapper');
+      if (wrapper) wrapper.style.display = this.value === '__frei__' ? '' : 'none';
+    });
+    // Initialisieren
+    const initWrapper = document.getElementById('srv-zweck-frei-wrapper');
+    if (initWrapper) {
+      initWrapper.style.display = srvZweckSelect.value === '__frei__' ? '' : 'none';
+    }
+  }
+
+  // pc_kennung_type → Label/Hint anpassen
+  const pcKennungTypeSelect = document.getElementById('id_pc_kennung_type');
+  if (pcKennungTypeSelect) {
+    pcKennungTypeSelect.addEventListener('change', function () {
+      updatePcKennungLabel(this.value);
+    });
+    updatePcKennungLabel(pcKennungTypeSelect.value);
+  }
+
+  // vm_funktion → Freitext-Feld ein-/ausblenden
+  const vmFunktionSelect = document.getElementById('id_vm_funktion');
+  if (vmFunktionSelect) {
+    vmFunktionSelect.addEventListener('change', function () {
+      const wrapper = document.getElementById('vm-funktion-frei-wrapper');
+      if (wrapper) wrapper.style.display = this.value === '__frei__' ? '' : 'none';
+    });
+    // Initialisieren
+    const vmInitWrapper = document.getElementById('vm-funktion-frei-wrapper');
+    if (vmInitWrapper) {
+      vmInitWrapper.style.display = vmFunktionSelect.value === '__frei__' ? '' : 'none';
+    }
+  }
+
+})();
+</script>
+{% endblock javascript %}

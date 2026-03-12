@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "netbox-name-generator"
+version = "1.0.0"
+description = "NetBox-Plugin zur regelkonformen IT-Systemnamen-Generierung gemäß Unternehmensrichtlinie"
+authors = [{ name = "Carsten Viell" }]
+requires-python = ">=3.10"
+dependencies = []
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["netbox_name_generator*"]
+
+[tool.setuptools.package-data]
+"netbox_name_generator" = ["templates/**/*"]
+
+[tool.setuptools]
+include-package-data = true
