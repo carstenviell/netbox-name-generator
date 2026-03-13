@@ -1,6 +1,6 @@
 # NetBox Name Generator
 
-NetBox-Plugin zur regelkonformen, automatisierten Namensvergabe für IT-Systeme gemäß Unternehmensrichtlinie.
+NetBox-Plugin zur regelkonformen, automatisierten Namensvergabe für IT-Systeme.
 
 ## Funktionsweise
 
