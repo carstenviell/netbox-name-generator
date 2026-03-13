@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "netbox-name-generator"
-version = "1.0.0"
+version = "1.1.0"
 description = "NetBox-Plugin zur regelkonformen IT-Systemnamen-Generierung"
 authors = [{ name = "Carsten Viell" }]
 requires-python = ">=3.10"
