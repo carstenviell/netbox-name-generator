@@ -52,7 +52,6 @@
                 {% if form.ng_standort.errors %}
                   <div class="invalid-feedback d-block">{{ form.ng_standort.errors|join:", " }}</div>
                 {% endif %}
-                <div class="form-text">RZ1 · HAU · NEB · B01</div>
               </div>
 
               <div class="col-md-3">
@@ -61,7 +60,6 @@
                 {% if form.ng_typ.errors %}
                   <div class="invalid-feedback d-block">{{ form.ng_typ.errors|join:", " }}</div>
                 {% endif %}
-                <div class="form-text">SW · FW · STO · AP</div>
               </div>
 
               <div class="col-md-3" id="ng-funktion-wrapper">
@@ -70,7 +68,7 @@
                 {% if form.ng_funktion.errors %}
                   <div class="invalid-feedback d-block">{{ form.ng_funktion.errors|join:", " }}</div>
                 {% endif %}
-                <div class="form-text" id="ng-funktion-hint">SW: COR·DIS·ACC·EDG</div>
+                <div class="form-text" id="ng-funktion-hint"></div>
               </div>
 
               <div class="col-md-3">
@@ -79,7 +77,7 @@
                 {% if form.ng_rackid.errors %}
                   <div class="invalid-feedback d-block">{{ form.ng_rackid.errors|join:", " }}</div>
                 {% endif %}
-                <div class="form-text" id="ng-rackid-hint">SW/FW: max. 3 Zeichen · STO: max. 2 · AP: max. 6</div>
+                <div class="form-text" id="ng-rackid-hint"></div>
               </div>
             </div>
           </fieldset>
@@ -107,7 +105,6 @@
                 {% if form.srv_zweck.errors %}
                   <div class="invalid-feedback d-block">{{ form.srv_zweck.errors|join:", " }}</div>
                 {% endif %}
-                <div class="form-text">ADDS · SQLP · FILE · MONI · SAP · EXCH · HYPV</div>
               </div>
 
               <div class="col-md-4" id="srv-zweck-frei-wrapper" style="display:none">
@@ -194,7 +191,6 @@
                 {% if form.vm_bereich.errors %}
                   <div class="invalid-feedback d-block">{{ form.vm_bereich.errors|join:", " }}</div>
                 {% endif %}
-                <div class="form-text">APP · WEB · DB · ADM · RDS · DEV · TEST · PROD</div>
               </div>
 
               <div class="col-md-4">
@@ -203,7 +199,6 @@
                 {% if form.vm_funktion.errors %}
                   <div class="invalid-feedback d-block">{{ form.vm_funktion.errors|join:", " }}</div>
                 {% endif %}
-                <div class="form-text">BMS · RDH · NOC · SQL · CRM · ERP · AD · FIL</div>
               </div>
 
               <div class="col-md-4" id="vm-funktion-frei-wrapper" style="display:none">
@@ -285,29 +280,9 @@
 (function () {
   'use strict';
 
-  // Konfiguration: welche Optionen zeigt ng_funktion je nach ng_typ
-  const ngFunktionenByTyp = {
-    'SW':  ['COR', 'DIS', 'ACC', 'EDG'],
-    'FW':  ['EXT', 'INT'],
-    'STO': ['SAN', 'NAS'],
-    'AP':  [],
-  };
-
-  const ngFunktionHints = {
-    'SW':  'COR · DIS · ACC · EDG',
-    'FW':  'EXT · INT',
-    'STO': 'SAN · NAS',
-    'AP':  'Kein Funktionskürzel (automatisch)',
-  };
-
-  // Max. RACKID-Länge je Typ (Formel: 15 − len(Präfix) − 2, Präfix = STANDORT(3)+'-'+TYP+'-'+FUNKTION)
-  // Konservativster Wert je Typ (längster Standort = 3, längste Funktion = 3)
-  const ngRackidHints = {
-    'SW':  'max. 3 Zeichen (z. B. NGV)',
-    'FW':  'max. 3 Zeichen (z. B. NGV)',
-    'STO': 'max. 2 Zeichen (z. B. R1)',
-    'AP':  'max. 6 Zeichen (keine Funktion)',
-  };
+  // Konfiguration aus dem Server (dynamisch aus der DB)
+  const ngFunktionenByTyp = {{ form.ng_funktionen_json|safe }};
+  const ngTypHatFunktion  = {{ form.ng_typ_hat_funktion_json|safe }};
 
   // Alle Typ-Sektionen ausblenden, eine einblenden
   function showSection(type) {
@@ -325,19 +300,24 @@
     const select = document.getElementById('id_ng_funktion');
     const wrapper = document.getElementById('ng-funktion-wrapper');
     const hint = document.getElementById('ng-funktion-hint');
+    const rackidHint = document.getElementById('ng-rackid-hint');
 
     if (!select) return;
 
-    // Alle Optionen aus DOM entfernen
-    select.innerHTML = '';
+    // Prüfen ob dieser Typ eine Funktion hat
+    const hatFunktion = ngTypHatFunktion.hasOwnProperty(typ) ? ngTypHatFunktion[typ] : true;
 
-    if (typ === 'AP') {
-      // AP hat keine Funktion – Feld ausblenden
+    if (!hatFunktion) {
+      // Typ ohne Funktion – Feld ausblenden
       if (wrapper) wrapper.style.display = 'none';
+      if (rackidHint) rackidHint.textContent = 'max. 6 Zeichen (keine Funktion)';
       return;
     }
 
     if (wrapper) wrapper.style.display = '';
+
+    // Alle Optionen aus DOM entfernen
+    select.innerHTML = '';
 
     // Platzhalter
     const placeholder = document.createElement('option');
@@ -353,10 +333,20 @@
       select.appendChild(opt);
     });
 
-    if (hint) hint.textContent = ngFunktionHints[typ] || '';
+    if (hint) hint.textContent = funktionen.join(' · ');
 
-    const rackidHint = document.getElementById('ng-rackid-hint');
-    if (rackidHint) rackidHint.textContent = ngRackidHints[typ] || 'max. 3 Zeichen';
+    // RACKID-Hinweis: dynamisch berechnet (konservativster Wert: Präfix = 3+1+3+1+max_funktion)
+    // Einfacher Hinweis basierend auf Funktionslänge
+    if (rackidHint) {
+      // Präfix = STANDORT(3) + '-' + TYP(<=4) + '-' + FUNKTION(<=4) → min. 3+1+2+1+3 = 10
+      // Damit bleibt für RACKID: 15 - 10 - 2 = 3 (worst case SW/FW)
+      // Für STO (3-stellige Funktion): 15 - (3+1+3+1+3) - 2 = 2
+      const maxTypLen = typ ? typ.length : 2;
+      const maxFunktionLen = funktionen.reduce(function(m, f) { return Math.max(m, f.length); }, 3);
+      const prefixLen = 3 + 1 + maxTypLen + 1 + maxFunktionLen;
+      const maxRackid = 15 - prefixLen - 2;
+      rackidHint.textContent = 'max. ' + maxRackid + ' Zeichen';
+    }
   }
 
   // PC-Kennungs-Label und -Hint dynamisch anpassen

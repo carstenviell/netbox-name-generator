@@ -7,27 +7,7 @@ Maximale Länge: 15 Zeichen
 
 import re
 
-# ---------------------------------------------------------------------------
-# Konstanten
-# ---------------------------------------------------------------------------
-
 ERLAUBTE_ZEICHEN = re.compile(r'^[A-Z0-9\-]+$')
-
-STANDORTE = ('RZ1', 'HAU', 'NEB', 'B01')
-
-NETZWERKGERAET_TYPEN = ('SW', 'FW', 'STO', 'AP')
-
-NETZWERKGERAET_FUNKTIONEN = {
-    'SW':  ('COR', 'DIS', 'ACC', 'EDG'),
-    'FW':  ('EXT', 'INT'),
-    'STO': ('SAN', 'NAS'),
-    'AP':  (),  # kein Präfix – NUMMER direkt nach TYP
-}
-
-SERVER_ZWECKE = ('ADDS', 'SQLP', 'FILE', 'MONI', 'SAP', 'EXCH', 'HYPV')
-
-VM_BEREICHE  = ('APP', 'WEB', 'DB', 'ADM', 'RDS', 'DEV', 'TEST', 'PROD')
-VM_FUNKTIONEN = ('BMS', 'RDH', 'NOC', 'SQL', 'CRM', 'ERP', 'AD', 'FIL')
 
 
 # ---------------------------------------------------------------------------
@@ -107,7 +87,7 @@ def generate_netzwerkgeraet(
     Args:
         standort:       z. B. 'RZ1'
         typ:            z. B. 'SW', 'FW', 'STO', 'AP'
-        funktion:       z. B. 'COR', 'EXT', 'SAN'  (leer für AP)
+        funktion:       z. B. 'COR', 'EXT', 'SAN'  (leer für Typen ohne Funktion)
         rackid:         Rack-Bezeichner, Länge abhängig vom Typ (s. o.)
         existing_names: bereits belegte Namen
 
@@ -119,16 +99,8 @@ def generate_netzwerkgeraet(
     funktion = funktion.upper().strip()
     rackid   = rackid.upper().strip()
 
-    if standort not in STANDORTE:
-        raise ValueError(f'Unbekannter Standort: "{standort}". Gültig: {STANDORTE}')
-    if typ not in NETZWERKGERAET_TYPEN:
-        raise ValueError(f'Unbekannter Typ: "{typ}". Gültig: {NETZWERKGERAET_TYPEN}')
     if not rackid or not re.match(r'^[A-Z0-9]+$', rackid):
         raise ValueError(f'RACKID darf nur A–Z und 0–9 enthalten und nicht leer sein: "{rackid}"')
-
-    # AP hat keine Funktion
-    if typ == 'AP':
-        funktion = ''
 
     prefix = f'{standort}-{typ}-{funktion}'
 
@@ -181,8 +153,6 @@ def generate_server(
     standort = standort.upper().strip()
     zweck    = zweck.upper().strip()
 
-    if standort not in STANDORTE:
-        raise ValueError(f'Unbekannter Standort: "{standort}". Gültig: {STANDORTE}')
     if not zweck or len(zweck) > 4:
         raise ValueError(f'ZWECK muss 1–4 Zeichen haben: "{zweck}"')
     if not re.match(r'^[A-Z0-9]+$', zweck):
@@ -228,9 +198,6 @@ def generate_pc(
     """
     standort = standort.upper().strip()
     kennung  = kennung.upper().strip()
-
-    if standort not in STANDORTE:
-        raise ValueError(f'Unbekannter Standort: "{standort}". Gültig: {STANDORTE}')
 
     if kennung_type == 'abteilung':
         if not kennung or len(kennung) > 4:
@@ -309,8 +276,6 @@ def generate_vm(
     bereich  = bereich.upper().strip()
     funktion = funktion.upper().strip()
 
-    if bereich not in VM_BEREICHE:
-        raise ValueError(f'Unbekannter Bereich: "{bereich}". Gültig: {VM_BEREICHE}')
     if not funktion or len(funktion) > 3:
         raise ValueError(f'VM-Funktion muss 1–3 Zeichen haben: "{funktion}"')
     if not re.match(r'^[A-Z0-9]+$', funktion):

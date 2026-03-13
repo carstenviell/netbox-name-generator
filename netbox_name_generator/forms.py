@@ -1,23 +1,19 @@
+import json
+
 from django import forms
 from django.urls import reverse
 
 from .name_logic import (
-    STANDORTE,
-    NETZWERKGERAET_TYPEN,
-    NETZWERKGERAET_FUNKTIONEN,
-    SERVER_ZWECKE,
-    VM_BEREICHE,
-    VM_FUNKTIONEN,
     generate_netzwerkgeraet,
-    generate_server,
-    generate_pc,
     generate_notebook,
+    generate_pc,
+    generate_server,
     generate_vm,
 )
 
 
 # ---------------------------------------------------------------------------
-# Choice-Tupel
+# Statische Choice-Tupel (nicht DB-abhängig)
 # ---------------------------------------------------------------------------
 
 SYSTEM_TYPE_CHOICES = [
@@ -29,35 +25,10 @@ SYSTEM_TYPE_CHOICES = [
     ('vm',             'Virtuelle Maschine'),
 ]
 
-STANDORT_CHOICES = [('', '— Standort —')] + [(s, s) for s in STANDORTE]
-
-NG_TYP_CHOICES = [('', '— Typ —')] + [(t, t) for t in NETZWERKGERAET_TYPEN]
-
-# Alle Funktion-Optionen für Netzwerkgeräte (werden per JS gefiltert)
-NG_FUNKTION_CHOICES = [('', '— Funktion —')]
-for _typ, _funktionen in NETZWERKGERAET_FUNKTIONEN.items():
-    for _f in _funktionen:
-        if (_f, _f) not in NG_FUNKTION_CHOICES:
-            NG_FUNKTION_CHOICES.append((_f, _f))
-
-SRV_ZWECK_CHOICES = (
-    [('', '— Zweck —')]
-    + [(z, z) for z in SERVER_ZWECKE]
-    + [('__frei__', 'Freitext …')]
-)
-
 PC_KENNUNG_TYPE_CHOICES = [
     ('abteilung', 'Abteilungskürzel (mit Auto-Nummerierung)'),
     ('inventar',  'Inventarnummer (direkt)'),
 ]
-
-VM_BEREICH_CHOICES = [('', '— Bereich —')] + [(b, b) for b in VM_BEREICHE]
-
-VM_FUNKTION_CHOICES = (
-    [('', '— Funktion —')]
-    + [(f, f) for f in VM_FUNKTIONEN]
-    + [('__frei__', 'Freitext …')]
-)
 
 
 # ---------------------------------------------------------------------------
@@ -73,17 +44,17 @@ class NameGeneratorForm(forms.Form):
 
     # --- Netzwerkgerät ---
     ng_standort = forms.ChoiceField(
-        choices=STANDORT_CHOICES,
+        choices=[],
         label='Standort',
         required=False,
     )
     ng_typ = forms.ChoiceField(
-        choices=NG_TYP_CHOICES,
+        choices=[],
         label='Gerätetyp',
         required=False,
     )
     ng_funktion = forms.ChoiceField(
-        choices=NG_FUNKTION_CHOICES,
+        choices=[],
         label='Funktion',
         required=False,
     )
@@ -96,12 +67,12 @@ class NameGeneratorForm(forms.Form):
 
     # --- Server ---
     srv_standort = forms.ChoiceField(
-        choices=STANDORT_CHOICES,
+        choices=[],
         label='Standort',
         required=False,
     )
     srv_zweck = forms.ChoiceField(
-        choices=SRV_ZWECK_CHOICES,
+        choices=[],
         label='Zweck',
         required=False,
     )
@@ -114,7 +85,7 @@ class NameGeneratorForm(forms.Form):
 
     # --- Desktop-PC ---
     pc_standort = forms.ChoiceField(
-        choices=STANDORT_CHOICES,
+        choices=[],
         label='Standort',
         required=False,
     )
@@ -140,12 +111,12 @@ class NameGeneratorForm(forms.Form):
 
     # --- Virtuelle Maschine ---
     vm_bereich = forms.ChoiceField(
-        choices=VM_BEREICH_CHOICES,
+        choices=[],
         label='Bereich',
         required=False,
     )
     vm_funktion = forms.ChoiceField(
-        choices=VM_FUNKTION_CHOICES,
+        choices=[],
         label='Funktion',
         required=False,
     )
@@ -160,6 +131,73 @@ class NameGeneratorForm(forms.Form):
     generated_name: str = ''
     target_url: str = ''
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Lazy Import, damit name_logic testbar ohne Django bleibt
+        from .models import (
+            NetzwerkgeraetFunktion,
+            NetzwerkgeraetTyp,
+            ServerZweck,
+            Standort,
+            VmBereich,
+            VmFunktion,
+        )
+
+        standorte = list(Standort.objects.select_related('site').order_by('kuerzel'))
+        typen = list(NetzwerkgeraetTyp.objects.prefetch_related('funktionen').order_by('kuerzel'))
+        serverzwecke = list(ServerZweck.objects.order_by('kuerzel'))
+        vmbereiche = list(VmBereich.objects.order_by('kuerzel'))
+        vmfunktionen = list(VmFunktion.objects.order_by('kuerzel'))
+
+        # Standort-Label: zeigt verknüpfte NetBox-Site wenn vorhanden
+        def standort_label(s):
+            return f'{s.kuerzel} – {s.site.name}' if s.site_id else s.kuerzel
+
+        standort_choices = [('', '— Standort —')] + [(s.kuerzel, standort_label(s)) for s in standorte]
+        self.fields['ng_standort'].choices = standort_choices
+        self.fields['srv_standort'].choices = standort_choices
+        self.fields['pc_standort'].choices = standort_choices
+
+        self.fields['ng_typ'].choices = [('', '— Typ —')] + [(t.kuerzel, t.kuerzel) for t in typen]
+
+        # Alle Funktionen für ng_funktion (JS filtert nach Typ)
+        alle_funktionen: set[str] = set()
+        for t in typen:
+            for f in t.funktionen.all():
+                alle_funktionen.add(f.kuerzel)
+        self.fields['ng_funktion'].choices = (
+            [('', '— Funktion —')]
+            + [(f, f) for f in sorted(alle_funktionen)]
+        )
+
+        self.fields['srv_zweck'].choices = (
+            [('', '— Zweck —')]
+            + [(z.kuerzel, z.kuerzel) for z in serverzwecke]
+            + [('__frei__', 'Freitext …')]
+        )
+
+        self.fields['vm_bereich'].choices = (
+            [('', '— Bereich —')]
+            + [(b.kuerzel, b.kuerzel) for b in vmbereiche]
+        )
+
+        self.fields['vm_funktion'].choices = (
+            [('', '— Funktion —')]
+            + [(f.kuerzel, f.kuerzel) for f in vmfunktionen]
+            + [('__frei__', 'Freitext …')]
+        )
+
+        # JSON-Attribute für JavaScript
+        funktionen_by_typ: dict[str, list[str]] = {}
+        typ_hat_funktion: dict[str, bool] = {}
+        for t in typen:
+            funktionen_by_typ[t.kuerzel] = [f.kuerzel for f in t.funktionen.all()]
+            typ_hat_funktion[t.kuerzel] = t.hat_funktion
+
+        self.ng_funktionen_json = json.dumps(funktionen_by_typ)
+        self.ng_typ_hat_funktion_json = json.dumps(typ_hat_funktion)
+
     def clean(self):
         cleaned = super().clean()
         system_type = cleaned.get('system_type')
@@ -167,7 +205,6 @@ class NameGeneratorForm(forms.Form):
         if not system_type:
             raise forms.ValidationError('Bitte einen Systemtyp auswählen.')
 
-        # Lazy Import hier, damit name_logic testbar ohne Django bleibt
         from dcim.models import Device
         from virtualization.models import VirtualMachine
 
@@ -175,6 +212,14 @@ class NameGeneratorForm(forms.Form):
             set(Device.objects.values_list('name', flat=True))
             | set(VirtualMachine.objects.values_list('name', flat=True))
         )
+
+        # Standort-Kürzel je Systemtyp ermitteln (für Site-Vorausfüllung)
+        standort_kuerzel_map = {
+            'netzwerkgeraet': cleaned.get('ng_standort', ''),
+            'server':         cleaned.get('srv_standort', ''),
+            'pc':             cleaned.get('pc_standort', ''),
+        }
+        standort_kuerzel = standort_kuerzel_map.get(system_type, '')
 
         try:
             if system_type == 'netzwerkgeraet':
@@ -203,13 +248,29 @@ class NameGeneratorForm(forms.Form):
         except ValueError as exc:
             raise forms.ValidationError(str(exc)) from exc
 
+        # Site-ID des gewählten Standorts ermitteln
+        site_id = None
+        if standort_kuerzel:
+            from .models import Standort as StandortModel
+            try:
+                site_id = StandortModel.objects.get(kuerzel=standort_kuerzel).site_id
+            except StandortModel.DoesNotExist:
+                pass
+
+        # Redirect-URL aufbauen
+        params = f'name={name}'
+        if site_id:
+            params += f'&site={site_id}'
+
         self.generated_name = name
-        self.target_url = f'{url_base}?name={name}'
+        self.target_url = f'{url_base}?{params}'
         return cleaned
 
     # --- Typ-spezifische clean-Methoden ---
 
     def _clean_netzwerkgeraet(self, cleaned: dict, existing_names: set) -> str:
+        from .models import NetzwerkgeraetTyp
+
         standort = cleaned.get('ng_standort', '')
         typ      = cleaned.get('ng_typ', '')
         funktion = cleaned.get('ng_funktion', '')
@@ -222,8 +283,14 @@ class NameGeneratorForm(forms.Form):
         if not rackid:
             raise forms.ValidationError('Bitte eine Rack-ID eingeben.')
 
-        # AP hat keine Funktion
-        if typ == 'AP':
+        # Prüfen ob der Typ eine Funktion erfordert
+        try:
+            typ_obj = NetzwerkgeraetTyp.objects.get(kuerzel=typ)
+            hat_funktion = typ_obj.hat_funktion
+        except NetzwerkgeraetTyp.DoesNotExist:
+            hat_funktion = True
+
+        if not hat_funktion:
             funktion = ''
         else:
             if not funktion:
