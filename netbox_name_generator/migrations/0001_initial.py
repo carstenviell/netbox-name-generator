@@ -13,8 +13,8 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('dcim', '0226_modulebay_rebuild_tree'),
-        ('extras', '0134_owner'),
+        ('dcim', '0001_initial'),
+        ('extras', '0001_initial'),
     ]
 
     operations = [
