@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy as _
 from dcim.models import Site
 from netbox.forms import NetBoxModelForm
 from utilities.forms.fields import DynamicModelChoiceField
@@ -16,8 +17,8 @@ class StandortForm(NetBoxModelForm):
     site = DynamicModelChoiceField(
         queryset=Site.objects.all(),
         required=False,
-        label='NetBox-Site',
-        help_text='Verknüpfung mit dem NetBox-Standort – wird beim Gerät-Anlegen vorausgefüllt.',
+        label=_('NetBox Site'),
+        help_text=_('Link to NetBox site – pre-filled when creating a device.'),
     )
 
     class Meta:

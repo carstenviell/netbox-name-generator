@@ -1,1 +1,2 @@
 recursive-include netbox_name_generator/templates *
+recursive-include netbox_name_generator/locale *

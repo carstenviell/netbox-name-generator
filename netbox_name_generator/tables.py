@@ -1,4 +1,5 @@
 import django_tables2 as tables
+from django.utils.translation import gettext_lazy as _
 from netbox.tables import NetBoxTable
 
 from .models import (
@@ -13,7 +14,7 @@ from .models import (
 
 class StandortTable(NetBoxTable):
     kuerzel = tables.Column(linkify=True)
-    site = tables.Column(linkify=True, verbose_name='NetBox-Site')
+    site = tables.Column(linkify=True, verbose_name=_('NetBox Site'))
 
     class Meta(NetBoxTable.Meta):
         model = Standort

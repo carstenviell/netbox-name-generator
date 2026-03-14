@@ -1,0 +1,296 @@
+# German translations for netbox_name_generator
+# Copyright (C) 2026 Carsten Viell
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: de\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "System Type"
+msgstr "Systemtyp"
+
+msgid "— Select System Type —"
+msgstr "— Systemtyp wählen —"
+
+msgid "Network Device (Switch, Firewall, Storage, AP)"
+msgstr "Netzwerkgerät (Switch, Firewall, Storage, AP)"
+
+msgid "Physical Server"
+msgstr "Physischer Server"
+
+msgid "Desktop PC"
+msgstr "Desktop-PC"
+
+msgid "Virtual Machine"
+msgstr "Virtuelle Maschine"
+
+msgid "Department Code (with Auto-Numbering)"
+msgstr "Abteilungskürzel (mit Auto-Nummerierung)"
+
+msgid "Inventory Number (direct)"
+msgstr "Inventarnummer (direkt)"
+
+msgid "Site"
+msgstr "Standort"
+
+msgid "Device Type"
+msgstr "Gerätetyp"
+
+msgid "Function"
+msgstr "Funktion"
+
+msgid "Rack ID"
+msgstr "Rack-ID"
+
+msgid "Purpose"
+msgstr "Zweck"
+
+msgid "Purpose (free-text, max. 4 characters)"
+msgstr "Zweck (Freitext, max. 4 Zeichen)"
+
+msgid "Identifier Type"
+msgstr "Kennungstyp"
+
+msgid "Code / Inventory Number"
+msgstr "Kürzel / Inventarnummer"
+
+msgid "User Code"
+msgstr "Benutzerkürzel"
+
+msgid "Area"
+msgstr "Bereich"
+
+msgid "Function (free-text, max. 3 characters)"
+msgstr "Funktion (Freitext, max. 3 Zeichen)"
+
+msgid "— Site —"
+msgstr "— Standort —"
+
+msgid "— Type —"
+msgstr "— Typ —"
+
+msgid "— Function —"
+msgstr "— Funktion —"
+
+msgid "— Purpose —"
+msgstr "— Zweck —"
+
+msgid "Free-text …"
+msgstr "Freitext …"
+
+msgid "— Area —"
+msgstr "— Bereich —"
+
+msgid "Please select a system type."
+msgstr "Bitte einen Systemtyp auswählen."
+
+msgid "Unknown system type:"
+msgstr "Unbekannter Systemtyp:"
+
+msgid "Please select a site for the network device."
+msgstr "Bitte einen Standort für das Netzwerkgerät wählen."
+
+msgid "Please select a device type."
+msgstr "Bitte einen Gerätetyp wählen."
+
+msgid "Please enter a Rack ID."
+msgstr "Bitte eine Rack-ID eingeben."
+
+msgid "Please select a function for the network device."
+msgstr "Bitte eine Funktion für das Netzwerkgerät wählen."
+
+msgid "Please select a site for the server."
+msgstr "Bitte einen Standort für den Server wählen."
+
+msgid "Please enter a free-text purpose."
+msgstr "Bitte einen Freitext-Zweck eingeben."
+
+msgid "Please select a purpose for the server."
+msgstr "Bitte einen Zweck für den Server wählen."
+
+msgid "Please select a site for the PC."
+msgstr "Bitte einen Standort für den PC wählen."
+
+msgid "Please enter a code or inventory number."
+msgstr "Bitte ein Kürzel oder eine Inventarnummer eingeben."
+
+msgid "Please enter a user code."
+msgstr "Bitte ein Benutzerkürzel eingeben."
+
+msgid "Please select an area for the VM."
+msgstr "Bitte einen Bereich für die VM wählen."
+
+msgid "Please enter a free-text function."
+msgstr "Bitte eine Freitext-Funktion eingeben."
+
+msgid "Please select a function for the VM."
+msgstr "Bitte eine Funktion für die VM wählen."
+
+msgid "Abbreviation"
+msgstr "Kürzel"
+
+msgid "Description"
+msgstr "Beschreibung"
+
+msgid "NetBox Site"
+msgstr "NetBox-Site"
+
+msgid "Link to NetBox site – pre-filled when creating a device."
+msgstr "Verknüpfung mit dem NetBox-Standort – wird beim Gerät-Anlegen vorausgefüllt."
+
+msgid "Sites"
+msgstr "Standorte"
+
+msgid "Has Function"
+msgstr "Hat Funktion"
+
+msgid "Disable for types without function abbreviation (e.g. AP)"
+msgstr "Deaktivieren für Typen ohne Funktionskürzel (z. B. AP)"
+
+msgid "Network Device Type"
+msgstr "Netzwerkgerät-Typ"
+
+msgid "Network Device Types"
+msgstr "Netzwerkgerät-Typen"
+
+msgid "Type"
+msgstr "Typ"
+
+msgid "Network Device Function"
+msgstr "Netzwerkgerät-Funktion"
+
+msgid "Network Device Functions"
+msgstr "Netzwerkgerät-Funktionen"
+
+msgid "Server Purpose"
+msgstr "Server-Zweck"
+
+msgid "Server Purposes"
+msgstr "Server-Zwecke"
+
+msgid "VM Area"
+msgstr "VM-Bereich"
+
+msgid "VM Areas"
+msgstr "VM-Bereiche"
+
+msgid "VM Function"
+msgstr "VM-Funktion"
+
+msgid "VM Functions"
+msgstr "VM-Funktionen"
+
+msgid "Only uppercase letters (A–Z) and digits (0–9) allowed."
+msgstr "Nur Großbuchstaben (A–Z) und Ziffern (0–9) erlaubt."
+
+msgid "Add Site"
+msgstr "Standort hinzufügen"
+
+msgid "ND Types"
+msgstr "NG-Typen"
+
+msgid "Add ND Type"
+msgstr "NG-Typ hinzufügen"
+
+msgid "ND Functions"
+msgstr "NG-Funktionen"
+
+msgid "Add ND Function"
+msgstr "NG-Funktion hinzufügen"
+
+msgid "Add Server Purpose"
+msgstr "Server-Zweck hinzufügen"
+
+msgid "Add VM Area"
+msgstr "VM-Bereich hinzufügen"
+
+msgid "Add VM Function"
+msgstr "VM-Funktion hinzufügen"
+
+msgid "Network Device"
+msgstr "Netzwerkgerät"
+
+msgid "Schema: <code>[LOCATION]-[TYPE]-[FUNCTION][NUMBER][RACKID]</code> &mdash; exactly 15 characters"
+msgstr "Schema: <code>[STANDORT]-[TYP]-[FUNKTION][NUMMER][RACKID]</code> &mdash; genau 15 Zeichen"
+
+msgid "Example:"
+msgstr "Beispiel:"
+
+msgid "Schema: <code>[LOCATION]-SRV-[PURPOSE][NUMBER]</code> &mdash; 14 characters"
+msgstr "Schema: <code>[STANDORT]-SRV-[ZWECK][NUMMER]</code> &mdash; 14 Zeichen"
+
+msgid "Free-text Purpose"
+msgstr "Freitext-Zweck"
+
+msgid "Max. 4 characters, A–Z / 0–9"
+msgstr "Max. 4 Zeichen, A–Z / 0–9"
+
+msgid "Schema: <code>[LOCATION]-PC-[IDENTIFIER]</code> &mdash; max. 15 characters"
+msgstr "Schema: <code>[STANDORT]-PC-[KENNUNG]</code> &mdash; max. 15 Zeichen"
+
+msgid "or"
+msgstr "oder"
+
+msgid "Department Code"
+msgstr "Abteilungskürzel"
+
+msgid "max. 4 characters, number assigned automatically"
+msgstr "max. 4 Zeichen, Nummer wird automatisch vergeben"
+
+msgid "Schema: <code>NB-[USERCODE]</code> &mdash; max. 15 characters"
+msgstr "Schema: <code>NB-[BENUTZERKUERZEL]</code> &mdash; max. 15 Zeichen"
+
+msgid "Only A–Z and 0–9, max. 12 characters (e.g. SCHMIDTH)"
+msgstr "Nur A–Z und 0–9, max. 12 Zeichen (z. B. SCHMIDTH)"
+
+msgid "Schema: <code>VM-[AREA]-[FUNCTION][NUMBER]</code> &mdash; 12 characters"
+msgstr "Schema: <code>VM-[BEREICH]-[FUNKTION][NUMMER]</code> &mdash; 12 Zeichen"
+
+msgid "Free-text Function"
+msgstr "Freitext-Funktion"
+
+msgid "Max. 3 characters, A–Z / 0–9"
+msgstr "Max. 3 Zeichen, A–Z / 0–9"
+
+msgid "Generate Name & Continue"
+msgstr "Name generieren & weiter"
+
+msgid "Reset"
+msgstr "Zurücksetzen"
+
+msgid "Reference"
+msgstr "Abkürzungsreferenz"
+
+msgid "Data Center 1"
+msgstr "Rechenzentrum 1"
+
+msgid "Main Building"
+msgstr "Hauptgebäude"
+
+msgid "Secondary Building"
+msgstr "Nebengebäude"
+
+msgid "Building 01"
+msgstr "Gebäude 01"
+
+msgid "Network Devices – Function"
+msgstr "Netzwerkgeräte – Funktion"
+
+msgid "Server – Purpose"
+msgstr "Server – Zweck"
+
+msgid "File Server"
+msgstr "Dateiserver"
+
+msgid "max. 6 characters (no function)"
+msgstr "max. 6 Zeichen (keine Funktion)"
+
+msgid "Inventory Number"
+msgstr "Inventarnummer"
+
+msgid "Used directly, no auto-numbering"
+msgstr "Direkt übernommen, keine Auto-Nummerierung"
+
+msgid "characters"
+msgstr "Zeichen"

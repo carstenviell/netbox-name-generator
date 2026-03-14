@@ -1,4 +1,5 @@
 {% extends 'base/layout.html' %}
+{% load i18n %}
 
 {% block title %}Name Generator{% endblock %}
 
@@ -29,7 +30,7 @@
           {# ── Systemtyp ──────────────────────────────────────────────── #}
           <div class="mb-4">
             <label for="{{ form.system_type.id_for_label }}" class="form-label fw-semibold">
-              Systemtyp <span class="text-danger">*</span>
+              {% trans "System Type" %} <span class="text-danger">*</span>
             </label>
             {{ form.system_type }}
             {% if form.system_type.errors %}
@@ -39,15 +40,15 @@
 
           {# ── Netzwerkgerät ───────────────────────────────────────────── #}
           <fieldset id="section-netzwerkgeraet" class="ng-section border rounded p-3 mb-4" style="display:none">
-            <legend class="float-none w-auto px-2 fs-6 fw-semibold">Netzwerkgerät</legend>
+            <legend class="float-none w-auto px-2 fs-6 fw-semibold">{% trans "Network Device" %}</legend>
             <p class="text-muted small mb-3">
-              Schema: <code>[STANDORT]-[TYP]-[FUNKTION][NUMMER][RACKID]</code> &mdash; genau 15 Zeichen<br>
-              Beispiel: <code>RZ1-SW-COR01NGV</code>
+              {% blocktrans %}Schema: <code>[LOCATION]-[TYPE]-[FUNCTION][NUMBER][RACKID]</code> &mdash; exactly 15 characters{% endblocktrans %}<br>
+              {% trans "Example:" %} <code>RZ1-SW-COR01NGV</code>
             </p>
 
             <div class="row g-3">
               <div class="col-md-3">
-                <label for="{{ form.ng_standort.id_for_label }}" class="form-label">Standort</label>
+                <label for="{{ form.ng_standort.id_for_label }}" class="form-label">{% trans "Site" %}</label>
                 {{ form.ng_standort }}
                 {% if form.ng_standort.errors %}
                   <div class="invalid-feedback d-block">{{ form.ng_standort.errors|join:", " }}</div>
@@ -55,7 +56,7 @@
               </div>
 
               <div class="col-md-3">
-                <label for="{{ form.ng_typ.id_for_label }}" class="form-label">Gerätetyp</label>
+                <label for="{{ form.ng_typ.id_for_label }}" class="form-label">{% trans "Device Type" %}</label>
                 {{ form.ng_typ }}
                 {% if form.ng_typ.errors %}
                   <div class="invalid-feedback d-block">{{ form.ng_typ.errors|join:", " }}</div>
@@ -63,7 +64,7 @@
               </div>
 
               <div class="col-md-3" id="ng-funktion-wrapper">
-                <label for="{{ form.ng_funktion.id_for_label }}" class="form-label">Funktion</label>
+                <label for="{{ form.ng_funktion.id_for_label }}" class="form-label">{% trans "Function" %}</label>
                 {{ form.ng_funktion }}
                 {% if form.ng_funktion.errors %}
                   <div class="invalid-feedback d-block">{{ form.ng_funktion.errors|join:", " }}</div>
@@ -72,7 +73,7 @@
               </div>
 
               <div class="col-md-3">
-                <label for="{{ form.ng_rackid.id_for_label }}" class="form-label">Rack-ID</label>
+                <label for="{{ form.ng_rackid.id_for_label }}" class="form-label">{% trans "Rack ID" %}</label>
                 {{ form.ng_rackid }}
                 {% if form.ng_rackid.errors %}
                   <div class="invalid-feedback d-block">{{ form.ng_rackid.errors|join:", " }}</div>
@@ -84,15 +85,15 @@
 
           {# ── Server ──────────────────────────────────────────────────── #}
           <fieldset id="section-server" class="ng-section border rounded p-3 mb-4" style="display:none">
-            <legend class="float-none w-auto px-2 fs-6 fw-semibold">Physischer Server</legend>
+            <legend class="float-none w-auto px-2 fs-6 fw-semibold">{% trans "Physical Server" %}</legend>
             <p class="text-muted small mb-3">
-              Schema: <code>[STANDORT]-SRV-[ZWECK][NUMMER]</code> &mdash; 14 Zeichen<br>
-              Beispiel: <code>RZ1-SRV-ADDS01</code>
+              {% blocktrans %}Schema: <code>[LOCATION]-SRV-[PURPOSE][NUMBER]</code> &mdash; 14 characters{% endblocktrans %}<br>
+              {% trans "Example:" %} <code>RZ1-SRV-ADDS01</code>
             </p>
 
             <div class="row g-3">
               <div class="col-md-4">
-                <label for="{{ form.srv_standort.id_for_label }}" class="form-label">Standort</label>
+                <label for="{{ form.srv_standort.id_for_label }}" class="form-label">{% trans "Site" %}</label>
                 {{ form.srv_standort }}
                 {% if form.srv_standort.errors %}
                   <div class="invalid-feedback d-block">{{ form.srv_standort.errors|join:", " }}</div>
@@ -100,7 +101,7 @@
               </div>
 
               <div class="col-md-4">
-                <label for="{{ form.srv_zweck.id_for_label }}" class="form-label">Zweck</label>
+                <label for="{{ form.srv_zweck.id_for_label }}" class="form-label">{% trans "Purpose" %}</label>
                 {{ form.srv_zweck }}
                 {% if form.srv_zweck.errors %}
                   <div class="invalid-feedback d-block">{{ form.srv_zweck.errors|join:", " }}</div>
@@ -108,27 +109,27 @@
               </div>
 
               <div class="col-md-4" id="srv-zweck-frei-wrapper" style="display:none">
-                <label for="{{ form.srv_zweck_frei.id_for_label }}" class="form-label">Freitext-Zweck</label>
+                <label for="{{ form.srv_zweck_frei.id_for_label }}" class="form-label">{% trans "Free-text Purpose" %}</label>
                 {{ form.srv_zweck_frei }}
                 {% if form.srv_zweck_frei.errors %}
                   <div class="invalid-feedback d-block">{{ form.srv_zweck_frei.errors|join:", " }}</div>
                 {% endif %}
-                <div class="form-text">Max. 4 Zeichen, A–Z / 0–9</div>
+                <div class="form-text">{% trans "Max. 4 characters, A–Z / 0–9" %}</div>
               </div>
             </div>
           </fieldset>
 
           {# ── Desktop-PC ──────────────────────────────────────────────── #}
           <fieldset id="section-pc" class="ng-section border rounded p-3 mb-4" style="display:none">
-            <legend class="float-none w-auto px-2 fs-6 fw-semibold">Desktop-PC</legend>
+            <legend class="float-none w-auto px-2 fs-6 fw-semibold">{% trans "Desktop PC" %}</legend>
             <p class="text-muted small mb-3">
-              Schema: <code>[STANDORT]-PC-[KENNUNG]</code> &mdash; max. 15 Zeichen<br>
-              Beispiel: <code>HAU-PC-MARK01</code> oder <code>HAU-PC-INV0042</code>
+              {% blocktrans %}Schema: <code>[LOCATION]-PC-[IDENTIFIER]</code> &mdash; max. 15 characters{% endblocktrans %}<br>
+              {% trans "Example:" %} <code>HAU-PC-MARK01</code> {% trans "or" %} <code>HAU-PC-INV0042</code>
             </p>
 
             <div class="row g-3">
               <div class="col-md-4">
-                <label for="{{ form.pc_standort.id_for_label }}" class="form-label">Standort</label>
+                <label for="{{ form.pc_standort.id_for_label }}" class="form-label">{% trans "Site" %}</label>
                 {{ form.pc_standort }}
                 {% if form.pc_standort.errors %}
                   <div class="invalid-feedback d-block">{{ form.pc_standort.errors|join:", " }}</div>
@@ -136,7 +137,7 @@
               </div>
 
               <div class="col-md-4">
-                <label for="{{ form.pc_kennung_type.id_for_label }}" class="form-label">Kennungstyp</label>
+                <label for="{{ form.pc_kennung_type.id_for_label }}" class="form-label">{% trans "Identifier Type" %}</label>
                 {{ form.pc_kennung_type }}
                 {% if form.pc_kennung_type.errors %}
                   <div class="invalid-feedback d-block">{{ form.pc_kennung_type.errors|join:", " }}</div>
@@ -145,13 +146,13 @@
 
               <div class="col-md-4">
                 <label for="{{ form.pc_kennung.id_for_label }}" class="form-label" id="pc-kennung-label">
-                  Abteilungskürzel
+                  {% trans "Department Code" %}
                 </label>
                 {{ form.pc_kennung }}
                 {% if form.pc_kennung.errors %}
                   <div class="invalid-feedback d-block">{{ form.pc_kennung.errors|join:", " }}</div>
                 {% endif %}
-                <div class="form-text" id="pc-kennung-hint">max. 4 Zeichen, Nummer wird automatisch vergeben</div>
+                <div class="form-text" id="pc-kennung-hint">{% trans "max. 4 characters, number assigned automatically" %}</div>
               </div>
             </div>
           </fieldset>
@@ -160,33 +161,33 @@
           <fieldset id="section-notebook" class="ng-section border rounded p-3 mb-4" style="display:none">
             <legend class="float-none w-auto px-2 fs-6 fw-semibold">Notebook</legend>
             <p class="text-muted small mb-3">
-              Schema: <code>NB-[BENUTZERKUERZEL]</code> &mdash; max. 15 Zeichen<br>
-              Beispiel: <code>NB-SCHMIDTH</code>
+              {% blocktrans %}Schema: <code>NB-[USERCODE]</code> &mdash; max. 15 characters{% endblocktrans %}<br>
+              {% trans "Example:" %} <code>NB-SCHMIDTH</code>
             </p>
 
             <div class="row g-3">
               <div class="col-md-6">
-                <label for="{{ form.nb_kuerzel.id_for_label }}" class="form-label">Benutzerkürzel</label>
+                <label for="{{ form.nb_kuerzel.id_for_label }}" class="form-label">{% trans "User Code" %}</label>
                 {{ form.nb_kuerzel }}
                 {% if form.nb_kuerzel.errors %}
                   <div class="invalid-feedback d-block">{{ form.nb_kuerzel.errors|join:", " }}</div>
                 {% endif %}
-                <div class="form-text">Nur A–Z und 0–9, max. 12 Zeichen (z. B. SCHMIDTH)</div>
+                <div class="form-text">{% trans "Only A–Z and 0–9, max. 12 characters (e.g. SCHMIDTH)" %}</div>
               </div>
             </div>
           </fieldset>
 
           {# ── Virtuelle Maschine ──────────────────────────────────────── #}
           <fieldset id="section-vm" class="ng-section border rounded p-3 mb-4" style="display:none">
-            <legend class="float-none w-auto px-2 fs-6 fw-semibold">Virtuelle Maschine</legend>
+            <legend class="float-none w-auto px-2 fs-6 fw-semibold">{% trans "Virtual Machine" %}</legend>
             <p class="text-muted small mb-3">
-              Schema: <code>VM-[BEREICH]-[FUNKTION][NUMMER]</code> &mdash; 12 Zeichen<br>
-              Beispiel: <code>VM-APP-BMS01</code>
+              {% blocktrans %}Schema: <code>VM-[AREA]-[FUNCTION][NUMBER]</code> &mdash; 12 characters{% endblocktrans %}<br>
+              {% trans "Example:" %} <code>VM-APP-BMS01</code>
             </p>
 
             <div class="row g-3">
               <div class="col-md-4">
-                <label for="{{ form.vm_bereich.id_for_label }}" class="form-label">Bereich</label>
+                <label for="{{ form.vm_bereich.id_for_label }}" class="form-label">{% trans "Area" %}</label>
                 {{ form.vm_bereich }}
                 {% if form.vm_bereich.errors %}
                   <div class="invalid-feedback d-block">{{ form.vm_bereich.errors|join:", " }}</div>
@@ -194,7 +195,7 @@
               </div>
 
               <div class="col-md-4">
-                <label for="{{ form.vm_funktion.id_for_label }}" class="form-label">Funktion</label>
+                <label for="{{ form.vm_funktion.id_for_label }}" class="form-label">{% trans "Function" %}</label>
                 {{ form.vm_funktion }}
                 {% if form.vm_funktion.errors %}
                   <div class="invalid-feedback d-block">{{ form.vm_funktion.errors|join:", " }}</div>
@@ -202,12 +203,12 @@
               </div>
 
               <div class="col-md-4" id="vm-funktion-frei-wrapper" style="display:none">
-                <label for="{{ form.vm_funktion_frei.id_for_label }}" class="form-label">Freitext-Funktion</label>
+                <label for="{{ form.vm_funktion_frei.id_for_label }}" class="form-label">{% trans "Free-text Function" %}</label>
                 {{ form.vm_funktion_frei }}
                 {% if form.vm_funktion_frei.errors %}
                   <div class="invalid-feedback d-block">{{ form.vm_funktion_frei.errors|join:", " }}</div>
                 {% endif %}
-                <div class="form-text">Max. 3 Zeichen, A–Z / 0–9</div>
+                <div class="form-text">{% trans "Max. 3 characters, A–Z / 0–9" %}</div>
               </div>
             </div>
           </fieldset>
@@ -215,10 +216,10 @@
           {# ── Submit ──────────────────────────────────────────────────── #}
           <div class="d-flex gap-2">
             <button type="submit" class="btn btn-primary" id="submit-btn" disabled>
-              <i class="mdi mdi-arrow-right-circle me-1"></i>Name generieren &amp; weiter
+              <i class="mdi mdi-arrow-right-circle me-1"></i>{% trans "Generate Name & Continue" %}
             </button>
             <a href="." class="btn btn-outline-secondary">
-              <i class="mdi mdi-refresh me-1"></i>Zurücksetzen
+              <i class="mdi mdi-refresh me-1"></i>{% trans "Reset" %}
             </a>
           </div>
 
@@ -226,26 +227,26 @@
       </div>{# card-body #}
     </div>{# card #}
 
-    {# Abkürzungsreferenz #}
+    {# Reference card #}
     <div class="card mt-4">
       <div class="card-header">
         <h6 class="card-title mb-0">
-          <i class="mdi mdi-information-outline me-2"></i>Abkürzungsreferenz
+          <i class="mdi mdi-information-outline me-2"></i>{% trans "Reference" %}
         </h6>
       </div>
       <div class="card-body">
         <div class="row g-3 small">
           <div class="col-md-4">
-            <strong>Standorte</strong>
+            <strong>{% trans "Sites" %}</strong>
             <ul class="list-unstyled mb-0 mt-1">
-              <li><code>RZ1</code> — Rechenzentrum 1</li>
-              <li><code>HAU</code> — Hauptgebäude</li>
-              <li><code>NEB</code> — Nebengebäude</li>
-              <li><code>B01</code> — Gebäude 01</li>
+              <li><code>RZ1</code> — {% trans "Data Center 1" %}</li>
+              <li><code>HAU</code> — {% trans "Main Building" %}</li>
+              <li><code>NEB</code> — {% trans "Secondary Building" %}</li>
+              <li><code>B01</code> — {% trans "Building 01" %}</li>
             </ul>
           </div>
           <div class="col-md-4">
-            <strong>Netzwerkgeräte – Funktion</strong>
+            <strong>{% trans "Network Devices – Function" %}</strong>
             <ul class="list-unstyled mb-0 mt-1">
               <li><code>COR</code> Core &nbsp;<code>DIS</code> Distribution</li>
               <li><code>ACC</code> Access &nbsp;<code>EDG</code> Edge</li>
@@ -255,11 +256,11 @@
             </ul>
           </div>
           <div class="col-md-4">
-            <strong>Server – Zweck</strong>
+            <strong>{% trans "Server – Purpose" %}</strong>
             <ul class="list-unstyled mb-0 mt-1">
               <li><code>ADDS</code> Active Directory</li>
               <li><code>SQLP</code> SQL Server</li>
-              <li><code>FILE</code> Dateiserver</li>
+              <li><code>FILE</code> {% trans "File Server" %}</li>
               <li><code>MONI</code> Monitoring</li>
               <li><code>SAP</code> SAP-System</li>
               <li><code>EXCH</code> Exchange</li>
@@ -310,7 +311,7 @@
     if (!hatFunktion) {
       // Typ ohne Funktion – Feld ausblenden
       if (wrapper) wrapper.style.display = 'none';
-      if (rackidHint) rackidHint.textContent = 'max. 6 Zeichen (keine Funktion)';
+      if (rackidHint) rackidHint.textContent = '{% trans "max. 6 characters (no function)" %}';
       return;
     }
 
@@ -322,7 +323,7 @@
     // Platzhalter
     const placeholder = document.createElement('option');
     placeholder.value = '';
-    placeholder.textContent = '— Funktion —';
+    placeholder.textContent = '— {% trans "Function" %} —';
     select.appendChild(placeholder);
 
     const funktionen = ngFunktionenByTyp[typ] || [];
@@ -345,7 +346,7 @@
       const maxFunktionLen = funktionen.reduce(function(m, f) { return Math.max(m, f.length); }, 3);
       const prefixLen = 3 + 1 + maxTypLen + 1 + maxFunktionLen;
       const maxRackid = 15 - prefixLen - 2;
-      rackidHint.textContent = 'max. ' + maxRackid + ' Zeichen';
+      rackidHint.textContent = 'max. ' + maxRackid + ' {% trans "characters" %}';
     }
   }
 
@@ -356,12 +357,12 @@
     const input = document.getElementById('id_pc_kennung');
 
     if (kennungType === 'inventar') {
-      if (label) label.textContent = 'Inventarnummer';
-      if (hint)  hint.textContent  = 'Direkt übernommen, keine Auto-Nummerierung';
+      if (label) label.textContent = '{% trans "Inventory Number" %}';
+      if (hint)  hint.textContent  = '{% trans "Used directly, no auto-numbering" %}';
       if (input) input.placeholder = 'z. B. INV0042';
     } else {
-      if (label) label.textContent = 'Abteilungskürzel';
-      if (hint)  hint.textContent  = 'max. 4 Zeichen, Nummer wird automatisch vergeben';
+      if (label) label.textContent = '{% trans "Department Code" %}';
+      if (hint)  hint.textContent  = '{% trans "max. 4 characters, number assigned automatically" %}';
       if (input) input.placeholder = 'z. B. MARK';
     }
   }

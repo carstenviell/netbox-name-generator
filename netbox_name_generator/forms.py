@@ -2,6 +2,7 @@ import json
 
 from django import forms
 from django.urls import reverse
+from django.utils.translation import gettext_lazy as _
 
 from .name_logic import (
     generate_netzwerkgeraet,
@@ -17,17 +18,17 @@ from .name_logic import (
 # ---------------------------------------------------------------------------
 
 SYSTEM_TYPE_CHOICES = [
-    ('', '— Systemtyp wählen —'),
-    ('netzwerkgeraet', 'Netzwerkgerät (Switch, Firewall, Storage, AP)'),
-    ('server',         'Physischer Server'),
-    ('pc',             'Desktop-PC'),
+    ('', _('— Select System Type —')),
+    ('netzwerkgeraet', _('Network Device (Switch, Firewall, Storage, AP)')),
+    ('server',         _('Physical Server')),
+    ('pc',             _('Desktop PC')),
     ('notebook',       'Notebook'),
-    ('vm',             'Virtuelle Maschine'),
+    ('vm',             _('Virtual Machine')),
 ]
 
 PC_KENNUNG_TYPE_CHOICES = [
-    ('abteilung', 'Abteilungskürzel (mit Auto-Nummerierung)'),
-    ('inventar',  'Inventarnummer (direkt)'),
+    ('abteilung', _('Department Code (with Auto-Numbering)')),
+    ('inventar',  _('Inventory Number (direct)')),
 ]
 
 
@@ -39,27 +40,27 @@ class NameGeneratorForm(forms.Form):
     # Haupt-Selektor
     system_type = forms.ChoiceField(
         choices=SYSTEM_TYPE_CHOICES,
-        label='Systemtyp',
+        label=_('System Type'),
     )
 
     # --- Netzwerkgerät ---
     ng_standort = forms.ChoiceField(
         choices=[],
-        label='Standort',
+        label=_('Site'),
         required=False,
     )
     ng_typ = forms.ChoiceField(
         choices=[],
-        label='Gerätetyp',
+        label=_('Device Type'),
         required=False,
     )
     ng_funktion = forms.ChoiceField(
         choices=[],
-        label='Funktion',
+        label=_('Function'),
         required=False,
     )
     ng_rackid = forms.CharField(
-        label='Rack-ID',
+        label=_('Rack ID'),
         max_length=6,
         required=False,
         widget=forms.TextInput(attrs={'placeholder': 'z. B. NGV'}),
@@ -68,16 +69,16 @@ class NameGeneratorForm(forms.Form):
     # --- Server ---
     srv_standort = forms.ChoiceField(
         choices=[],
-        label='Standort',
+        label=_('Site'),
         required=False,
     )
     srv_zweck = forms.ChoiceField(
         choices=[],
-        label='Zweck',
+        label=_('Purpose'),
         required=False,
     )
     srv_zweck_frei = forms.CharField(
-        label='Zweck (Freitext, max. 4 Zeichen)',
+        label=_('Purpose (free-text, max. 4 characters)'),
         max_length=4,
         required=False,
         widget=forms.TextInput(attrs={'placeholder': 'z. B. BKUP'}),
@@ -86,16 +87,16 @@ class NameGeneratorForm(forms.Form):
     # --- Desktop-PC ---
     pc_standort = forms.ChoiceField(
         choices=[],
-        label='Standort',
+        label=_('Site'),
         required=False,
     )
     pc_kennung_type = forms.ChoiceField(
         choices=PC_KENNUNG_TYPE_CHOICES,
-        label='Kennungstyp',
+        label=_('Identifier Type'),
         required=False,
     )
     pc_kennung = forms.CharField(
-        label='Kürzel / Inventarnummer',
+        label=_('Code / Inventory Number'),
         max_length=10,
         required=False,
         widget=forms.TextInput(attrs={'placeholder': 'z. B. MARK oder INV0042'}),
@@ -103,7 +104,7 @@ class NameGeneratorForm(forms.Form):
 
     # --- Notebook ---
     nb_kuerzel = forms.CharField(
-        label='Benutzerkürzel',
+        label=_('User Code'),
         max_length=12,
         required=False,
         widget=forms.TextInput(attrs={'placeholder': 'z. B. SCHMIDTH'}),
@@ -112,16 +113,16 @@ class NameGeneratorForm(forms.Form):
     # --- Virtuelle Maschine ---
     vm_bereich = forms.ChoiceField(
         choices=[],
-        label='Bereich',
+        label=_('Area'),
         required=False,
     )
     vm_funktion = forms.ChoiceField(
         choices=[],
-        label='Funktion',
+        label=_('Function'),
         required=False,
     )
     vm_funktion_frei = forms.CharField(
-        label='Funktion (Freitext, max. 3 Zeichen)',
+        label=_('Function (free-text, max. 3 characters)'),
         max_length=3,
         required=False,
         widget=forms.TextInput(attrs={'placeholder': 'z. B. MON'}),
@@ -154,12 +155,12 @@ class NameGeneratorForm(forms.Form):
         def standort_label(s):
             return f'{s.kuerzel} – {s.site.name}' if s.site_id else s.kuerzel
 
-        standort_choices = [('', '— Standort —')] + [(s.kuerzel, standort_label(s)) for s in standorte]
+        standort_choices = [('', _('— Site —'))] + [(s.kuerzel, standort_label(s)) for s in standorte]
         self.fields['ng_standort'].choices = standort_choices
         self.fields['srv_standort'].choices = standort_choices
         self.fields['pc_standort'].choices = standort_choices
 
-        self.fields['ng_typ'].choices = [('', '— Typ —')] + [(t.kuerzel, t.kuerzel) for t in typen]
+        self.fields['ng_typ'].choices = [('', _('— Type —'))] + [(t.kuerzel, t.kuerzel) for t in typen]
 
         # Alle Funktionen für ng_funktion (JS filtert nach Typ)
         alle_funktionen: set[str] = set()
@@ -167,25 +168,25 @@ class NameGeneratorForm(forms.Form):
             for f in t.funktionen.all():
                 alle_funktionen.add(f.kuerzel)
         self.fields['ng_funktion'].choices = (
-            [('', '— Funktion —')]
+            [('', _('— Function —'))]
             + [(f, f) for f in sorted(alle_funktionen)]
         )
 
         self.fields['srv_zweck'].choices = (
-            [('', '— Zweck —')]
+            [('', _('— Purpose —'))]
             + [(z.kuerzel, z.kuerzel) for z in serverzwecke]
-            + [('__frei__', 'Freitext …')]
+            + [('__frei__', _('Free-text …'))]
         )
 
         self.fields['vm_bereich'].choices = (
-            [('', '— Bereich —')]
+            [('', _('— Area —'))]
             + [(b.kuerzel, b.kuerzel) for b in vmbereiche]
         )
 
         self.fields['vm_funktion'].choices = (
-            [('', '— Funktion —')]
+            [('', _('— Function —'))]
             + [(f.kuerzel, f.kuerzel) for f in vmfunktionen]
-            + [('__frei__', 'Freitext …')]
+            + [('__frei__', _('Free-text …'))]
         )
 
         # JSON-Attribute für JavaScript
@@ -203,7 +204,7 @@ class NameGeneratorForm(forms.Form):
         system_type = cleaned.get('system_type')
 
         if not system_type:
-            raise forms.ValidationError('Bitte einen Systemtyp auswählen.')
+            raise forms.ValidationError(_('Please select a system type.'))
 
         from dcim.models import Device
         from virtualization.models import VirtualMachine
@@ -243,7 +244,7 @@ class NameGeneratorForm(forms.Form):
                 url_base = reverse('virtualization:virtualmachine_add')
 
             else:
-                raise forms.ValidationError(f'Unbekannter Systemtyp: {system_type}')
+                raise forms.ValidationError(_('Unknown system type:') + f' {system_type}')
 
         except ValueError as exc:
             raise forms.ValidationError(str(exc)) from exc
@@ -277,11 +278,11 @@ class NameGeneratorForm(forms.Form):
         rackid   = cleaned.get('ng_rackid', '').upper().strip()
 
         if not standort:
-            raise forms.ValidationError('Bitte einen Standort für das Netzwerkgerät wählen.')
+            raise forms.ValidationError(_('Please select a site for the network device.'))
         if not typ:
-            raise forms.ValidationError('Bitte einen Gerätetyp wählen.')
+            raise forms.ValidationError(_('Please select a device type.'))
         if not rackid:
-            raise forms.ValidationError('Bitte eine Rack-ID eingeben.')
+            raise forms.ValidationError(_('Please enter a Rack ID.'))
 
         # Prüfen ob der Typ eine Funktion erfordert
         try:
@@ -294,7 +295,7 @@ class NameGeneratorForm(forms.Form):
             funktion = ''
         else:
             if not funktion:
-                raise forms.ValidationError('Bitte eine Funktion für das Netzwerkgerät wählen.')
+                raise forms.ValidationError(_('Please select a function for the network device.'))
 
         return generate_netzwerkgeraet(standort, typ, funktion, rackid, existing_names)
 
@@ -304,14 +305,14 @@ class NameGeneratorForm(forms.Form):
         zweck_frei = cleaned.get('srv_zweck_frei', '').upper().strip()
 
         if not standort:
-            raise forms.ValidationError('Bitte einen Standort für den Server wählen.')
+            raise forms.ValidationError(_('Please select a site for the server.'))
 
         if zweck == '__frei__':
             if not zweck_frei:
-                raise forms.ValidationError('Bitte einen Freitext-Zweck eingeben.')
+                raise forms.ValidationError(_('Please enter a free-text purpose.'))
             zweck = zweck_frei
         elif not zweck:
-            raise forms.ValidationError('Bitte einen Zweck für den Server wählen.')
+            raise forms.ValidationError(_('Please select a purpose for the server.'))
 
         return generate_server(standort, zweck, existing_names)
 
@@ -321,9 +322,9 @@ class NameGeneratorForm(forms.Form):
         kennung      = cleaned.get('pc_kennung', '').upper().strip()
 
         if not standort:
-            raise forms.ValidationError('Bitte einen Standort für den PC wählen.')
+            raise forms.ValidationError(_('Please select a site for the PC.'))
         if not kennung:
-            raise forms.ValidationError('Bitte ein Kürzel oder eine Inventarnummer eingeben.')
+            raise forms.ValidationError(_('Please enter a code or inventory number.'))
 
         return generate_pc(standort, kennung_type, kennung, existing_names)
 
@@ -331,7 +332,7 @@ class NameGeneratorForm(forms.Form):
         kuerzel = cleaned.get('nb_kuerzel', '').upper().strip()
 
         if not kuerzel:
-            raise forms.ValidationError('Bitte ein Benutzerkürzel eingeben.')
+            raise forms.ValidationError(_('Please enter a user code.'))
 
         return generate_notebook(kuerzel)
 
@@ -341,13 +342,13 @@ class NameGeneratorForm(forms.Form):
         funktion_frei = cleaned.get('vm_funktion_frei', '').upper().strip()
 
         if not bereich:
-            raise forms.ValidationError('Bitte einen Bereich für die VM wählen.')
+            raise forms.ValidationError(_('Please select an area for the VM.'))
 
         if funktion == '__frei__':
             if not funktion_frei:
-                raise forms.ValidationError('Bitte eine Freitext-Funktion eingeben.')
+                raise forms.ValidationError(_('Please enter a free-text function.'))
             funktion = funktion_frei
         elif not funktion:
-            raise forms.ValidationError('Bitte eine Funktion für die VM wählen.')
+            raise forms.ValidationError(_('Please select a function for the VM.'))
 
         return generate_vm(bereich, funktion, existing_names)

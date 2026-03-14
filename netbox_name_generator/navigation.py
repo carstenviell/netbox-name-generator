@@ -1,3 +1,5 @@
+from django.utils.translation import gettext_lazy as _
+
 from netbox.plugins.navigation import ButtonColorChoices, PluginMenuButton, PluginMenuItem
 
 menu_items = (
@@ -7,11 +9,11 @@ menu_items = (
     ),
     PluginMenuItem(
         link='plugins:netbox_name_generator:standort_list',
-        link_text='Standorte',
+        link_text=_('Sites'),
         buttons=(
             PluginMenuButton(
                 link='plugins:netbox_name_generator:standort_add',
-                title='Standort hinzufügen',
+                title=_('Add Site'),
                 icon_class='mdi mdi-plus-thick',
                 color=ButtonColorChoices.GREEN,
             ),
@@ -19,11 +21,11 @@ menu_items = (
     ),
     PluginMenuItem(
         link='plugins:netbox_name_generator:netzwerkgeraettyp_list',
-        link_text='NG-Typen',
+        link_text=_('ND Types'),
         buttons=(
             PluginMenuButton(
                 link='plugins:netbox_name_generator:netzwerkgeraettyp_add',
-                title='NG-Typ hinzufügen',
+                title=_('Add ND Type'),
                 icon_class='mdi mdi-plus-thick',
                 color=ButtonColorChoices.GREEN,
             ),
@@ -31,11 +33,11 @@ menu_items = (
     ),
     PluginMenuItem(
         link='plugins:netbox_name_generator:netzwerkgeraetfunktion_list',
-        link_text='NG-Funktionen',
+        link_text=_('ND Functions'),
         buttons=(
             PluginMenuButton(
                 link='plugins:netbox_name_generator:netzwerkgeraetfunktion_add',
-                title='NG-Funktion hinzufügen',
+                title=_('Add ND Function'),
                 icon_class='mdi mdi-plus-thick',
                 color=ButtonColorChoices.GREEN,
             ),
@@ -43,11 +45,11 @@ menu_items = (
     ),
     PluginMenuItem(
         link='plugins:netbox_name_generator:serverzweck_list',
-        link_text='Server-Zwecke',
+        link_text=_('Server Purposes'),
         buttons=(
             PluginMenuButton(
                 link='plugins:netbox_name_generator:serverzweck_add',
-                title='Server-Zweck hinzufügen',
+                title=_('Add Server Purpose'),
                 icon_class='mdi mdi-plus-thick',
                 color=ButtonColorChoices.GREEN,
             ),
@@ -55,11 +57,11 @@ menu_items = (
     ),
     PluginMenuItem(
         link='plugins:netbox_name_generator:vmbereich_list',
-        link_text='VM-Bereiche',
+        link_text=_('VM Areas'),
         buttons=(
             PluginMenuButton(
                 link='plugins:netbox_name_generator:vmbereich_add',
-                title='VM-Bereich hinzufügen',
+                title=_('Add VM Area'),
                 icon_class='mdi mdi-plus-thick',
                 color=ButtonColorChoices.GREEN,
             ),
@@ -67,11 +69,11 @@ menu_items = (
     ),
     PluginMenuItem(
         link='plugins:netbox_name_generator:vmfunktion_list',
-        link_text='VM-Funktionen',
+        link_text=_('VM Functions'),
         buttons=(
             PluginMenuButton(
                 link='plugins:netbox_name_generator:vmfunktion_add',
-                title='VM-Funktion hinzufügen',
+                title=_('Add VM Function'),
                 icon_class='mdi mdi-plus-thick',
                 color=ButtonColorChoices.GREEN,
             ),
