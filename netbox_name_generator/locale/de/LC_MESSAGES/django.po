@@ -256,6 +256,9 @@ msgstr "Max. 3 Zeichen, A–Z / 0–9"
 msgid "Generate Name & Continue"
 msgstr "Name generieren & weiter"
 
+msgid "Generate Name & Add"
+msgstr "Name generieren & hinzufügen"
+
 msgid "Reset"
 msgstr "Zurücksetzen"
 
