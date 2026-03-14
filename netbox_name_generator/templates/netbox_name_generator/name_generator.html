@@ -5,7 +5,7 @@
 
 {% block content %}
 <div class="row">
-  <div class="col-md-8 offset-md-2">
+  <div class="col-12">
 
     <div class="card">
       <div class="card-header">
@@ -28,14 +28,16 @@
           {% csrf_token %}
 
           {# ── Systemtyp ──────────────────────────────────────────────── #}
-          <div class="mb-4">
-            <label for="{{ form.system_type.id_for_label }}" class="form-label fw-semibold">
-              {% trans "System Type" %} <span class="text-danger">*</span>
-            </label>
-            {{ form.system_type }}
-            {% if form.system_type.errors %}
-              <div class="invalid-feedback d-block">{{ form.system_type.errors|join:", " }}</div>
-            {% endif %}
+          <div class="row mb-4">
+            <div class="col-md-4">
+              <label for="{{ form.system_type.id_for_label }}" class="form-label fw-semibold">
+                {% trans "System Type" %} <span class="text-danger">*</span>
+              </label>
+              {{ form.system_type }}
+              {% if form.system_type.errors %}
+                <div class="invalid-feedback d-block">{{ form.system_type.errors|join:", " }}</div>
+              {% endif %}
+            </div>
           </div>
 
           {# ── Netzwerkgerät ───────────────────────────────────────────── #}
@@ -69,12 +71,13 @@
                 {% if form.ng_funktion.errors %}
                   <div class="invalid-feedback d-block">{{ form.ng_funktion.errors|join:", " }}</div>
                 {% endif %}
-                <div class="form-text" id="ng-funktion-hint"></div>
               </div>
 
               <div class="col-md-3">
-                <label for="{{ form.ng_rackid.id_for_label }}" class="form-label">{% trans "Rack ID" %}</label>
-                {{ form.ng_rackid }}
+                <label class="form-label" id="ng-rackid-label">{% trans "Rack ID" %}</label>
+                <div id="ng-rackid-container">
+                  {{ form.ng_rackid }}
+                </div>
                 {% if form.ng_rackid.errors %}
                   <div class="invalid-feedback d-block">{{ form.ng_rackid.errors|join:", " }}</div>
                 {% endif %}
@@ -166,7 +169,7 @@
             </p>
 
             <div class="row g-3">
-              <div class="col-md-6">
+              <div class="col-md-3">
                 <label for="{{ form.nb_kuerzel.id_for_label }}" class="form-label">{% trans "User Code" %}</label>
                 {{ form.nb_kuerzel }}
                 {% if form.nb_kuerzel.errors %}
@@ -213,6 +216,12 @@
             </div>
           </fieldset>
 
+          {# ── Vorschau ────────────────────────────────────────────────── #}
+          <div id="name-preview" class="alert alert-info py-2 px-3 mb-3" style="display:none">
+            <span class="text-muted small me-2">{% trans "Preview:" %}</span>
+            <code id="name-preview-value" class="fs-6 fw-semibold"></code>
+          </div>
+
           {# ── Submit ──────────────────────────────────────────────────── #}
           <div class="d-flex gap-2">
             <button type="submit" class="btn btn-primary" id="submit-btn" disabled>
@@ -227,50 +236,6 @@
       </div>{# card-body #}
     </div>{# card #}
 
-    {# Reference card #}
-    <div class="card mt-4">
-      <div class="card-header">
-        <h6 class="card-title mb-0">
-          <i class="mdi mdi-information-outline me-2"></i>{% trans "Reference" %}
-        </h6>
-      </div>
-      <div class="card-body">
-        <div class="row g-3 small">
-          <div class="col-md-4">
-            <strong>{% trans "Sites" %}</strong>
-            <ul class="list-unstyled mb-0 mt-1">
-              <li><code>RZ1</code> — {% trans "Data Center 1" %}</li>
-              <li><code>HAU</code> — {% trans "Main Building" %}</li>
-              <li><code>NEB</code> — {% trans "Secondary Building" %}</li>
-              <li><code>B01</code> — {% trans "Building 01" %}</li>
-            </ul>
-          </div>
-          <div class="col-md-4">
-            <strong>{% trans "Network Devices – Function" %}</strong>
-            <ul class="list-unstyled mb-0 mt-1">
-              <li><code>COR</code> Core &nbsp;<code>DIS</code> Distribution</li>
-              <li><code>ACC</code> Access &nbsp;<code>EDG</code> Edge</li>
-              <li><code>EXT</code> External (FW) &nbsp;<code>INT</code> Internal (FW)</li>
-              <li><code>SAN</code> Storage Area Network</li>
-              <li><code>NAS</code> Network Attached Storage</li>
-            </ul>
-          </div>
-          <div class="col-md-4">
-            <strong>{% trans "Server – Purpose" %}</strong>
-            <ul class="list-unstyled mb-0 mt-1">
-              <li><code>ADDS</code> Active Directory</li>
-              <li><code>SQLP</code> SQL Server</li>
-              <li><code>FILE</code> {% trans "File Server" %}</li>
-              <li><code>MONI</code> Monitoring</li>
-              <li><code>SAP</code> SAP-System</li>
-              <li><code>EXCH</code> Exchange</li>
-              <li><code>HYPV</code> Hypervisor</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-
   </div>{# col #}
 </div>{# row #}
 {% endblock content %}
@@ -282,8 +247,10 @@
   'use strict';
 
   // Konfiguration aus dem Server (dynamisch aus der DB)
-  const ngFunktionenByTyp = {{ form.ng_funktionen_json|safe }};
-  const ngTypHatFunktion  = {{ form.ng_typ_hat_funktion_json|safe }};
+  const ngFunktionenByTyp  = {{ form.ng_funktionen_json|safe }};
+  const ngTypHatFunktion   = {{ form.ng_typ_hat_funktion_json|safe }};
+  const ngStandortSiteMap  = {{ form.ng_standort_site_json|safe }};
+  const ngRacksBySite      = {{ form.ng_racks_json|safe }};
 
   // Alle Typ-Sektionen ausblenden, eine einblenden
   function showSection(type) {
@@ -300,60 +267,155 @@
   function updateNgFunktionen(typ) {
     const select = document.getElementById('id_ng_funktion');
     const wrapper = document.getElementById('ng-funktion-wrapper');
-    const hint = document.getElementById('ng-funktion-hint');
     const rackidHint = document.getElementById('ng-rackid-hint');
 
     if (!select) return;
 
-    // Prüfen ob dieser Typ eine Funktion hat
     const hatFunktion = ngTypHatFunktion.hasOwnProperty(typ) ? ngTypHatFunktion[typ] : true;
 
     if (!hatFunktion) {
-      // Typ ohne Funktion – Feld ausblenden
       if (wrapper) wrapper.style.display = 'none';
       if (rackidHint) rackidHint.textContent = '{% trans "max. 6 characters (no function)" %}';
       return;
     }
 
     if (wrapper) wrapper.style.display = '';
-
-    // Alle Optionen aus DOM entfernen
     select.innerHTML = '';
 
-    // Platzhalter
     const placeholder = document.createElement('option');
     placeholder.value = '';
     placeholder.textContent = '— {% trans "Function" %} —';
     select.appendChild(placeholder);
 
+    // ngFunktionenByTyp[typ] = [{v: kuerzel, l: label}, ...]
     const funktionen = ngFunktionenByTyp[typ] || [];
     funktionen.forEach(function (f) {
       const opt = document.createElement('option');
-      opt.value = f;
-      opt.textContent = f;
+      opt.value = f.v;
+      opt.textContent = f.l;
       select.appendChild(opt);
     });
 
-    if (hint) hint.textContent = funktionen.join(' · ');
-
-    // RACKID-Hinweis: dynamisch berechnet (konservativster Wert: Präfix = 3+1+3+1+max_funktion)
-    // Einfacher Hinweis basierend auf Funktionslänge
     if (rackidHint) {
-      // Präfix = STANDORT(3) + '-' + TYP(<=4) + '-' + FUNKTION(<=4) → min. 3+1+2+1+3 = 10
-      // Damit bleibt für RACKID: 15 - 10 - 2 = 3 (worst case SW/FW)
-      // Für STO (3-stellige Funktion): 15 - (3+1+3+1+3) - 2 = 2
       const maxTypLen = typ ? typ.length : 2;
-      const maxFunktionLen = funktionen.reduce(function(m, f) { return Math.max(m, f.length); }, 3);
+      const maxFunktionLen = funktionen.reduce(function(m, f) { return Math.max(m, f.v.length); }, 3);
       const prefixLen = 3 + 1 + maxTypLen + 1 + maxFunktionLen;
       const maxRackid = 15 - prefixLen - 2;
       rackidHint.textContent = 'max. ' + maxRackid + ' {% trans "characters" %}';
     }
   }
 
+  // Rack-Feld dynamisch als Dropdown oder Textfeld anzeigen
+  function updateRackField(standort) {
+    const container = document.getElementById('ng-rackid-container');
+    const input     = document.getElementById('id_ng_rackid');
+    const label     = document.getElementById('ng-rackid-label');
+    if (!container || !input) return;
+
+    const siteId = ngStandortSiteMap[standort];
+    const racks  = siteId ? (ngRacksBySite[siteId] || []) : [];
+
+    // Altes dynamisches Select entfernen
+    const existing = document.getElementById('ng-rack-dynamic-select');
+    if (existing) existing.remove();
+
+    if (racks.length > 0) {
+      input.style.display = 'none';
+      if (label) label.setAttribute('for', 'ng-rack-dynamic-select');
+
+      const sel = document.createElement('select');
+      sel.id = 'ng-rack-dynamic-select';
+      sel.className = 'form-select no-ts';
+
+      const ph = document.createElement('option');
+      ph.value = '';
+      ph.textContent = '— {% trans "Rack" %} —';
+      sel.appendChild(ph);
+
+      racks.forEach(function (rack) {
+        const opt = document.createElement('option');
+        opt.value = rack.v;
+        opt.textContent = rack.l;
+        // Vorauswahl wenn ng_rackid bereits gesetzt (nach Validierungsfehler)
+        if (rack.v === input.value) opt.selected = true;
+        sel.appendChild(opt);
+      });
+
+      sel.addEventListener('change', function () {
+        input.value = this.value;
+        updatePreview();
+      });
+
+      container.appendChild(sel);
+      // Aktuellen Wert aus Select → input synchronisieren
+      input.value = sel.value;
+    } else {
+      input.style.display = '';
+      if (label) label.setAttribute('for', 'id_ng_rackid');
+    }
+    updatePreview();
+  }
+
+  // Hilfsfunktion: Wert eines Feldes auslesen
+  function fval(id) {
+    const el = document.getElementById(id);
+    return el ? el.value : '';
+  }
+
+  // Live-Vorschau des generierten Namens
+  function updatePreview() {
+    const systemType = systemTypeSelect ? systemTypeSelect.value : '';
+    const previewEl  = document.getElementById('name-preview-value');
+    const previewBox = document.getElementById('name-preview');
+    if (!previewEl || !previewBox) return;
+
+    let preview = '';
+
+    if (systemType === 'netzwerkgeraet') {
+      const standort = fval('id_ng_standort') || '???';
+      const typ      = fval('id_ng_typ')      || '???';
+      const funktion = fval('id_ng_funktion') || '???';
+      const rackid   = fval('id_ng_rackid').toUpperCase() || '???';
+      const hatF     = ngTypHatFunktion.hasOwnProperty(typ) ? ngTypHatFunktion[typ] : true;
+      preview = hatF
+        ? standort + '-' + typ + '-' + funktion + '??' + rackid
+        : standort + '-' + typ + '-??' + rackid;
+    } else if (systemType === 'server') {
+      const standort = fval('id_srv_standort') || '???';
+      let zweck      = fval('id_srv_zweck');
+      if (zweck === '__frei__') zweck = fval('id_srv_zweck_frei').toUpperCase() || '???';
+      else zweck = zweck || '???';
+      preview = standort + '-SRV-' + zweck + '??';
+    } else if (systemType === 'pc') {
+      const standort    = fval('id_pc_standort') || '???';
+      const kennungType = fval('id_pc_kennung_type');
+      const kennung     = fval('id_pc_kennung').toUpperCase() || '???';
+      preview = kennungType === 'inventar'
+        ? standort + '-PC-' + kennung
+        : standort + '-PC-' + kennung + '??';
+    } else if (systemType === 'notebook') {
+      const kuerzel = fval('id_nb_kuerzel').toUpperCase() || '???';
+      preview = 'NB-' + kuerzel;
+    } else if (systemType === 'vm') {
+      const bereich = fval('id_vm_bereich') || '???';
+      let funktion  = fval('id_vm_funktion');
+      if (funktion === '__frei__') funktion = fval('id_vm_funktion_frei').toUpperCase() || '???';
+      else funktion = funktion || '???';
+      preview = 'VM-' + bereich + '-' + funktion + '??';
+    }
+
+    if (preview && systemType) {
+      previewEl.textContent = preview;
+      previewBox.style.display = '';
+    } else {
+      previewBox.style.display = 'none';
+    }
+  }
+
   // PC-Kennungs-Label und -Hint dynamisch anpassen
   function updatePcKennungLabel(kennungType) {
     const label = document.getElementById('pc-kennung-label');
-    const hint = document.getElementById('pc-kennung-hint');
+    const hint  = document.getElementById('pc-kennung-hint');
     const input = document.getElementById('id_pc_kennung');
 
     if (kennungType === 'inventar') {
@@ -378,12 +440,12 @@
   const systemTypeSelect = document.getElementById('id_system_type');
   if (systemTypeSelect) {
     systemTypeSelect.addEventListener('change', function () {
-      const val = this.value;
-      showSection(val);
-      updateSubmitBtn(val);
+      const v = this.value;
+      showSection(v);
+      updateSubmitBtn(v);
+      updatePreview();
     });
 
-    // Bootstrap-Klasse für alle Select-Felder setzen
     document.querySelectorAll('select').forEach(function (el) {
       el.classList.add('form-select');
     });
@@ -391,23 +453,44 @@
       el.classList.add('form-control');
     });
 
-    // Initialisierung: beim Seitenladen (z. B. nach Validation-Fehler) Zustand wiederherstellen
     const currentType = systemTypeSelect.value;
     if (currentType) {
       showSection(currentType);
       updateSubmitBtn(currentType);
+      updatePreview();
     }
   }
 
-  // ng_typ → ng_funktion filtern
+  // ng_typ → ng_funktion filtern + Vorschau
   const ngTypSelect = document.getElementById('id_ng_typ');
   if (ngTypSelect) {
     ngTypSelect.addEventListener('change', function () {
       updateNgFunktionen(this.value);
+      updatePreview();
     });
-    // Beim Laden initialisieren
     if (ngTypSelect.value) updateNgFunktionen(ngTypSelect.value);
   }
+
+  // ng_standort → Rack-Feld aktualisieren
+  const ngStandortSelect = document.getElementById('id_ng_standort');
+  if (ngStandortSelect) {
+    ngStandortSelect.addEventListener('change', function () {
+      updateRackField(this.value);
+    });
+    if (ngStandortSelect.value) updateRackField(ngStandortSelect.value);
+  }
+
+  // Alle weiteren Felder → Vorschau aktualisieren
+  ['id_ng_standort','id_ng_funktion','id_ng_rackid',
+   'id_srv_standort','id_srv_zweck','id_srv_zweck_frei',
+   'id_pc_standort','id_pc_kennung_type','id_pc_kennung',
+   'id_nb_kuerzel',
+   'id_vm_bereich','id_vm_funktion','id_vm_funktion_frei'
+  ].forEach(function(id) {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('change', updatePreview);
+    if (el && el.tagName === 'INPUT') el.addEventListener('input', updatePreview);
+  });
 
   // srv_zweck → Freitext-Feld ein-/ausblenden
   const srvZweckSelect = document.getElementById('id_srv_zweck');
@@ -416,11 +499,8 @@
       const wrapper = document.getElementById('srv-zweck-frei-wrapper');
       if (wrapper) wrapper.style.display = this.value === '__frei__' ? '' : 'none';
     });
-    // Initialisieren
     const initWrapper = document.getElementById('srv-zweck-frei-wrapper');
-    if (initWrapper) {
-      initWrapper.style.display = srvZweckSelect.value === '__frei__' ? '' : 'none';
-    }
+    if (initWrapper) initWrapper.style.display = srvZweckSelect.value === '__frei__' ? '' : 'none';
   }
 
   // pc_kennung_type → Label/Hint anpassen
@@ -439,11 +519,8 @@
       const wrapper = document.getElementById('vm-funktion-frei-wrapper');
       if (wrapper) wrapper.style.display = this.value === '__frei__' ? '' : 'none';
     });
-    // Initialisieren
     const vmInitWrapper = document.getElementById('vm-funktion-frei-wrapper');
-    if (vmInitWrapper) {
-      vmInitWrapper.style.display = vmFunktionSelect.value === '__frei__' ? '' : 'none';
-    }
+    if (vmInitWrapper) vmInitWrapper.style.display = vmFunktionSelect.value === '__frei__' ? '' : 'none';
   }
 
 })();
