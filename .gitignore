@@ -5,3 +5,8 @@ __pycache__/
 dist/
 build/
 .venv/
+
+.claude/
+ssh_carstenviell
+ssh_carstenviell.pub
+*.pdf
