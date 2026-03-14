@@ -1,8 +1,8 @@
 """
-Kernlogik für die Namensgenerierung gemäß IT-Systembezeichnungsrichtlinie.
+Core logic for name generation according to the IT system naming policy.
 
-Erlaubte Zeichen: A-Z, 0-9, Bindestrich (-)
-Maximale Länge: 15 Zeichen
+Allowed characters: A-Z, 0-9, hyphen (-)
+Maximum length: 15 characters
 """
 
 import re
@@ -11,43 +11,43 @@ ERLAUBTE_ZEICHEN = re.compile(r'^[A-Z0-9\-]+$')
 
 
 # ---------------------------------------------------------------------------
-# Hilfsfunktionen
+# Helper functions
 # ---------------------------------------------------------------------------
 
 def validate_name(name: str) -> tuple[bool, str]:
     """
-    Prüft, ob ein Name den allgemeinen Regeln entspricht.
+    Checks whether a name complies with the general rules.
 
     Returns:
-        (True, '') wenn gültig
-        (False, Fehlermeldung) wenn ungültig
+        (True, '') if valid
+        (False, error message) if invalid
     """
     if not name:
-        return False, 'Name darf nicht leer sein.'
+        return False, 'Name must not be empty.'
     if len(name) > 15:
-        return False, f'Name "{name}" ist {len(name)} Zeichen lang (max. 15).'
+        return False, f'Name "{name}" is {len(name)} characters long (max. 15).'
     if not ERLAUBTE_ZEICHEN.match(name):
         return False, (
-            f'Name "{name}" enthält unerlaubte Zeichen. '
-            'Nur A-Z, 0-9 und Bindestrich (-) sind zulässig.'
+            f'Name "{name}" contains invalid characters. '
+            'Only A-Z, 0-9 and hyphen (-) are allowed.'
         )
     return True, ''
 
 
 def _naechste_nummer(prefix: str, existing_names: set[str]) -> str:
     """
-    Sucht die kleinste freie zweistellige Nummer (01–99) für den gegebenen
-    Präfix (Groß-/Kleinschreibung wird ignoriert).
+    Finds the smallest available two-digit number (01–99) for the given
+    prefix (case-insensitive).
 
     Args:
-        prefix: Namenspräfix ohne Nummer, z. B. 'RZ1-SRV-ADDS'
-        existing_names: Menge bereits vergebener Namen
+        prefix: Name prefix without number, e.g. 'RZ1-SRV-ADDS'
+        existing_names: Set of already assigned names
 
     Returns:
-        Zweistellige Nummer als String, z. B. '01'
+        Two-digit number as string, e.g. '01'
 
     Raises:
-        ValueError: wenn alle Nummern 01–99 belegt sind
+        ValueError: if all numbers 01–99 are already assigned
     """
     prefix_upper = prefix.upper()
     existing_upper = {n.upper() for n in existing_names}
@@ -58,12 +58,12 @@ def _naechste_nummer(prefix: str, existing_names: set[str]) -> str:
             return nummer
 
     raise ValueError(
-        f'Alle Nummern 01–99 für Präfix "{prefix}" sind bereits vergeben.'
+        f'All numbers 01–99 for prefix "{prefix}" are already assigned.'
     )
 
 
 # ---------------------------------------------------------------------------
-# Namensgeneratoren
+# Name generators
 # ---------------------------------------------------------------------------
 
 def generate_netzwerkgeraet(
@@ -74,25 +74,25 @@ def generate_netzwerkgeraet(
     existing_names: set[str],
 ) -> str:
     """
-    Schema: [STANDORT]-[TYP]-[FUNKTION][NUMMER][RACKID]
-    Länge:  genau 15 Zeichen
+    Schema: [LOCATION]-[TYPE]-[FUNCTION][NUMBER][RACKID]
+    Length: exactly 15 characters
 
-    Die erlaubte RACKID-Länge ergibt sich aus: 15 − len(Präfix) − 2 (Nummer)
-      SW/FW  → max. 3 Zeichen  (z. B. NGV)
-      STO    → max. 2 Zeichen  (z. B. R1)
-      AP     → max. 6 Zeichen  (keine Funktion, mehr Platz)
+    The allowed RACKID length is derived from: 15 − len(prefix) − 2 (number)
+      SW/FW  → max. 3 characters  (e.g. NGV)
+      STO    → max. 2 characters  (e.g. R1)
+      AP     → max. 6 characters  (no function, more space)
 
-    Beispiel: RZ1-SW-COR01NGV  (3+1+2+1+3+2+3 = 15)
+    Example: RZ1-SW-COR01NGV  (3+1+2+1+3+2+3 = 15)
 
     Args:
-        standort:       z. B. 'RZ1'
-        typ:            z. B. 'SW', 'FW', 'STO', 'AP'
-        funktion:       z. B. 'COR', 'EXT', 'SAN'  (leer für Typen ohne Funktion)
-        rackid:         Rack-Bezeichner, Länge abhängig vom Typ (s. o.)
-        existing_names: bereits belegte Namen
+        standort:       e.g. 'RZ1'
+        typ:            e.g. 'SW', 'FW', 'STO', 'AP'
+        funktion:       e.g. 'COR', 'EXT', 'SAN'  (empty for types without function)
+        rackid:         Rack identifier, length depends on type (see above)
+        existing_names: already assigned names
 
     Returns:
-        Generierter Name, z. B. 'RZ1-SW-COR01NGV'
+        Generated name, e.g. 'RZ1-SW-COR01NGV'
     """
     standort = standort.upper().strip()
     typ      = typ.upper().strip()
@@ -100,20 +100,20 @@ def generate_netzwerkgeraet(
     rackid   = rackid.upper().strip()
 
     if not rackid or not re.match(r'^[A-Z0-9]+$', rackid):
-        raise ValueError(f'RACKID darf nur A–Z und 0–9 enthalten und nicht leer sein: "{rackid}"')
+        raise ValueError(f'RACKID must only contain A–Z and 0–9 and must not be empty: "{rackid}"')
 
     prefix = f'{standort}-{typ}-{funktion}'
 
-    # Dynamische RACKID-Längenbegrenzung: 15 − len(Präfix) − 2 (Nummer)
+    # Dynamic RACKID length limit: 15 − len(prefix) − 2 (number)
     max_rackid_len = 15 - len(prefix) - 2
     if len(rackid) > max_rackid_len:
         raise ValueError(
-            f'RACKID für {typ} darf maximal {max_rackid_len} Zeichen haben '
-            f'(eingegeben: {len(rackid)} Zeichen "{rackid}"). '
-            f'Präfix "{prefix}" + 2-stellige Nummer belegen bereits {len(prefix) + 2} Zeichen.'
+            f'RACKID for {typ} may be at most {max_rackid_len} characters '
+            f'(entered: {len(rackid)} characters "{rackid}"). '
+            f'Prefix "{prefix}" + 2-digit number already occupy {len(prefix) + 2} characters.'
         )
 
-    # Bestehende Namen auf Präfix+Nummer reduzieren (RACKID am Ende abschneiden)
+    # Reduce existing names to prefix+number (strip RACKID from end)
     rackid_len = len(rackid)
     existing_for_num = {
         n[:-rackid_len]
@@ -137,26 +137,26 @@ def generate_server(
     existing_names: set[str],
 ) -> str:
     """
-    Schema: [STANDORT]-SRV-[ZWECK][NUMMER]
-    Länge:  14 Zeichen
+    Schema: [LOCATION]-SRV-[PURPOSE][NUMBER]
+    Length: 14 characters
 
-    Beispiel: RZ1-SRV-ADDS01  (3+1+3+1+4+2 = 14)
+    Example: RZ1-SRV-ADDS01  (3+1+3+1+4+2 = 14)
 
     Args:
-        standort:       z. B. 'RZ1'
-        zweck:          z. B. 'ADDS', 'SQLP' oder freier Text (max. 4 Zeichen)
-        existing_names: bereits belegte Namen
+        standort:       e.g. 'RZ1'
+        zweck:          e.g. 'ADDS', 'SQLP' or free text (max. 4 characters)
+        existing_names: already assigned names
 
     Returns:
-        Generierter Name, z. B. 'RZ1-SRV-ADDS01'
+        Generated name, e.g. 'RZ1-SRV-ADDS01'
     """
     standort = standort.upper().strip()
     zweck    = zweck.upper().strip()
 
     if not zweck or len(zweck) > 4:
-        raise ValueError(f'ZWECK muss 1–4 Zeichen haben: "{zweck}"')
+        raise ValueError(f'PURPOSE must be 1–4 characters: "{zweck}"')
     if not re.match(r'^[A-Z0-9]+$', zweck):
-        raise ValueError(f'ZWECK darf nur A-Z und 0-9 enthalten: "{zweck}"')
+        raise ValueError(f'PURPOSE must only contain A-Z and 0-9: "{zweck}"')
 
     prefix   = f'{standort}-SRV-{zweck}'
     nummer   = _naechste_nummer(prefix, existing_names)
@@ -167,7 +167,7 @@ def generate_server(
         raise ValueError(err)
     if len(candidate) != 14:
         raise ValueError(
-            f'Generierter Name "{candidate}" hat {len(candidate)} Zeichen (erwartet: 14).'
+            f'Generated name "{candidate}" has {len(candidate)} characters (expected: 14).'
         )
 
     return candidate
@@ -180,43 +180,43 @@ def generate_pc(
     existing_names: set[str],
 ) -> str:
     """
-    Schema: [STANDORT]-PC-[KENNUNG]
-    Länge:  max. 15 Zeichen
+    Schema: [LOCATION]-PC-[IDENTIFIER]
+    Length: max. 15 characters
 
-    Bei kennung_type='abteilung': Kennung ist ein Kürzel (max. 4 Zeichen),
-    Nummer wird automatisch hochgezählt → z. B. HAU-PC-MARK01
-    Bei kennung_type='inventar': Kennung direkt übernommen → z. B. HAU-PC-INV0042
+    With kennung_type='abteilung': identifier is a department code (max. 4 characters),
+    number is assigned automatically → e.g. HAU-PC-MARK01
+    With kennung_type='inventar': identifier used directly → e.g. HAU-PC-INV0042
 
     Args:
-        standort:      z. B. 'HAU'
-        kennung_type:  'abteilung' oder 'inventar'
-        kennung:       Abteilungskürzel oder Inventarnummer
-        existing_names: bereits belegte Namen
+        standort:      e.g. 'HAU'
+        kennung_type:  'abteilung' or 'inventar'
+        kennung:       department code or inventory number
+        existing_names: already assigned names
 
     Returns:
-        Generierter Name
+        Generated name
     """
     standort = standort.upper().strip()
     kennung  = kennung.upper().strip()
 
     if kennung_type == 'abteilung':
         if not kennung or len(kennung) > 4:
-            raise ValueError(f'Abteilungskürzel muss 1–4 Zeichen haben: "{kennung}"')
+            raise ValueError(f'Department code must be 1–4 characters: "{kennung}"')
         if not re.match(r'^[A-Z0-9]+$', kennung):
-            raise ValueError(f'Abteilungskürzel darf nur A-Z und 0-9 enthalten: "{kennung}"')
+            raise ValueError(f'Department code must only contain A-Z and 0-9: "{kennung}"')
         prefix    = f'{standort}-PC-{kennung}'
         nummer    = _naechste_nummer(prefix, existing_names)
         candidate = f'{prefix}{nummer}'
 
     elif kennung_type == 'inventar':
         if not kennung:
-            raise ValueError('Inventarnummer darf nicht leer sein.')
+            raise ValueError('Inventory number must not be empty.')
         if not re.match(r'^[A-Z0-9]+$', kennung):
-            raise ValueError(f'Inventarnummer darf nur A-Z und 0-9 enthalten: "{kennung}"')
+            raise ValueError(f'Inventory number must only contain A-Z and 0-9: "{kennung}"')
         candidate = f'{standort}-PC-{kennung}'
 
     else:
-        raise ValueError(f'Unbekannter kennung_type: "{kennung_type}". Gültig: abteilung, inventar')
+        raise ValueError(f'Unknown kennung_type: "{kennung_type}". Valid: abteilung, inventar')
 
     ok, err = validate_name(candidate)
     if not ok:
@@ -227,23 +227,23 @@ def generate_pc(
 
 def generate_notebook(benutzerkuerzel: str) -> str:
     """
-    Schema: NB-[BENUTZERKUERZEL]
-    Länge:  max. 15 Zeichen
+    Schema: NB-[USERCODE]
+    Length: max. 15 characters
 
-    Beispiel: NB-SCHMIDTH  (2+1+8 = 11)
+    Example: NB-SCHMIDTH  (2+1+8 = 11)
 
     Args:
-        benutzerkuerzel: z. B. 'SCHMIDTH' (max. 12 Zeichen)
+        benutzerkuerzel: e.g. 'SCHMIDTH' (max. 12 characters)
 
     Returns:
-        Generierter Name, z. B. 'NB-SCHMIDTH'
+        Generated name, e.g. 'NB-SCHMIDTH'
     """
     kuerzel = benutzerkuerzel.upper().strip()
 
     if not kuerzel:
-        raise ValueError('Benutzerkürzel darf nicht leer sein.')
+        raise ValueError('User code must not be empty.')
     if not re.match(r'^[A-Z0-9]+$', kuerzel):
-        raise ValueError(f'Benutzerkürzel darf nur A-Z und 0-9 enthalten: "{kuerzel}"')
+        raise ValueError(f'User code must only contain A-Z and 0-9: "{kuerzel}"')
 
     candidate = f'NB-{kuerzel}'
 
@@ -260,26 +260,26 @@ def generate_vm(
     existing_names: set[str],
 ) -> str:
     """
-    Schema: VM-[BEREICH]-[FUNKTION][NUMMER]
-    Länge:  12 Zeichen
+    Schema: VM-[AREA]-[FUNCTION][NUMBER]
+    Length: 12 characters
 
-    Beispiel: VM-APP-BMS01  (2+1+3+1+3+2 = 12)
+    Example: VM-APP-BMS01  (2+1+3+1+3+2 = 12)
 
     Args:
-        bereich:        z. B. 'APP', 'WEB', 'DB'
-        funktion:       z. B. 'BMS', 'SQL' oder freier Text (max. 3 Zeichen)
-        existing_names: bereits belegte Namen
+        bereich:        e.g. 'APP', 'WEB', 'DB'
+        funktion:       e.g. 'BMS', 'SQL' or free text (max. 3 characters)
+        existing_names: already assigned names
 
     Returns:
-        Generierter Name, z. B. 'VM-APP-BMS01'
+        Generated name, e.g. 'VM-APP-BMS01'
     """
     bereich  = bereich.upper().strip()
     funktion = funktion.upper().strip()
 
     if not funktion or len(funktion) > 3:
-        raise ValueError(f'VM-Funktion muss 1–3 Zeichen haben: "{funktion}"')
+        raise ValueError(f'VM function must be 1–3 characters: "{funktion}"')
     if not re.match(r'^[A-Z0-9]+$', funktion):
-        raise ValueError(f'VM-Funktion darf nur A-Z und 0-9 enthalten: "{funktion}"')
+        raise ValueError(f'VM function must only contain A-Z and 0-9: "{funktion}"')
 
     prefix    = f'VM-{bereich}-{funktion}'
     nummer    = _naechste_nummer(prefix, existing_names)
@@ -290,7 +290,7 @@ def generate_vm(
         raise ValueError(err)
     if len(candidate) != 12:
         raise ValueError(
-            f'Generierter Name "{candidate}" hat {len(candidate)} Zeichen (erwartet: 12).'
+            f'Generated name "{candidate}" has {len(candidate)} characters (expected: 12).'
         )
 
     return candidate

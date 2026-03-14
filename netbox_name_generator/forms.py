@@ -58,6 +58,7 @@ class NameGeneratorForm(forms.Form):
         choices=[],
         label=_('Function'),
         required=False,
+        widget=forms.Select(attrs={'class': 'no-ts'}),
     )
     ng_rackid = forms.CharField(
         label=_('Rack ID'),
@@ -151,53 +152,78 @@ class NameGeneratorForm(forms.Form):
         vmbereiche = list(VmBereich.objects.order_by('kuerzel'))
         vmfunktionen = list(VmFunktion.objects.order_by('kuerzel'))
 
-        # Standort-Label: zeigt verknüpfte NetBox-Site wenn vorhanden
+        def label(kuerzel, beschreibung):
+            return f'{kuerzel} – {beschreibung}' if beschreibung else kuerzel
+
+        # Standort-Label: verknüpfte NetBox-Site, sonst Beschreibung
         def standort_label(s):
-            return f'{s.kuerzel} – {s.site.name}' if s.site_id else s.kuerzel
+            if s.site_id:
+                return f'{s.kuerzel} – {s.site.name}'
+            return label(s.kuerzel, s.beschreibung)
 
         standort_choices = [('', _('— Site —'))] + [(s.kuerzel, standort_label(s)) for s in standorte]
         self.fields['ng_standort'].choices = standort_choices
         self.fields['srv_standort'].choices = standort_choices
         self.fields['pc_standort'].choices = standort_choices
 
-        self.fields['ng_typ'].choices = [('', _('— Type —'))] + [(t.kuerzel, t.kuerzel) for t in typen]
+        self.fields['ng_typ'].choices = (
+            [('', _('— Type —'))]
+            + [(t.kuerzel, label(t.kuerzel, t.beschreibung)) for t in typen]
+        )
 
         # Alle Funktionen für ng_funktion (JS filtert nach Typ)
-        alle_funktionen: set[str] = set()
+        alle_funktionen: dict[str, str] = {}
         for t in typen:
             for f in t.funktionen.all():
-                alle_funktionen.add(f.kuerzel)
+                if f.kuerzel not in alle_funktionen:
+                    alle_funktionen[f.kuerzel] = label(f.kuerzel, f.beschreibung)
         self.fields['ng_funktion'].choices = (
             [('', _('— Function —'))]
-            + [(f, f) for f in sorted(alle_funktionen)]
+            + [(k, v) for k, v in sorted(alle_funktionen.items())]
         )
 
         self.fields['srv_zweck'].choices = (
             [('', _('— Purpose —'))]
-            + [(z.kuerzel, z.kuerzel) for z in serverzwecke]
+            + [(z.kuerzel, label(z.kuerzel, z.beschreibung)) for z in serverzwecke]
             + [('__frei__', _('Free-text …'))]
         )
 
         self.fields['vm_bereich'].choices = (
             [('', _('— Area —'))]
-            + [(b.kuerzel, b.kuerzel) for b in vmbereiche]
+            + [(b.kuerzel, label(b.kuerzel, b.beschreibung)) for b in vmbereiche]
         )
 
         self.fields['vm_funktion'].choices = (
             [('', _('— Function —'))]
-            + [(f.kuerzel, f.kuerzel) for f in vmfunktionen]
+            + [(f.kuerzel, label(f.kuerzel, f.beschreibung)) for f in vmfunktionen]
             + [('__frei__', _('Free-text …'))]
         )
 
         # JSON-Attribute für JavaScript
-        funktionen_by_typ: dict[str, list[str]] = {}
+        # ng_funktionen_json: {typ: [{v: kuerzel, l: label}, ...]}
+        funktionen_by_typ: dict[str, list] = {}
         typ_hat_funktion: dict[str, bool] = {}
         for t in typen:
-            funktionen_by_typ[t.kuerzel] = [f.kuerzel for f in t.funktionen.all()]
+            funktionen_by_typ[t.kuerzel] = [
+                {'v': f.kuerzel, 'l': label(f.kuerzel, f.beschreibung)}
+                for f in t.funktionen.all()
+            ]
             typ_hat_funktion[t.kuerzel] = t.hat_funktion
 
         self.ng_funktionen_json = json.dumps(funktionen_by_typ)
         self.ng_typ_hat_funktion_json = json.dumps(typ_hat_funktion)
+
+        # Standort → site_id und Racks pro site_id für JS
+        from dcim.models import Rack
+        standort_site_map = {s.kuerzel: s.site_id for s in standorte if s.site_id}
+        site_ids = list(standort_site_map.values())
+        racks_by_site: dict[int, list] = {}
+        for rack in Rack.objects.filter(site_id__in=site_ids).select_related('location').order_by('name'):
+            label_text = f'{rack.name} ({rack.location.name})' if rack.location_id else rack.name
+            racks_by_site.setdefault(rack.site_id, []).append({'v': rack.name, 'l': label_text})
+
+        self.ng_standort_site_json = json.dumps(standort_site_map)
+        self.ng_racks_json = json.dumps(racks_by_site)
 
     def clean(self):
         cleaned = super().clean()
@@ -258,10 +284,26 @@ class NameGeneratorForm(forms.Form):
             except StandortModel.DoesNotExist:
                 pass
 
+        # Rack und Location aus gewähltem Rack-Namen ermitteln (nur Netzwerkgeräte)
+        rack_id = None
+        location_id = None
+        if system_type == 'netzwerkgeraet' and site_id:
+            from dcim.models import Rack
+            rackid_value = cleaned.get('ng_rackid', '').strip()
+            if rackid_value:
+                rack = Rack.objects.filter(site_id=site_id, name=rackid_value).first()
+                if rack:
+                    rack_id = rack.id
+                    location_id = rack.location_id
+
         # Redirect-URL aufbauen
         params = f'name={name}'
         if site_id:
             params += f'&site={site_id}'
+        if rack_id:
+            params += f'&rack={rack_id}'
+        if location_id:
+            params += f'&location={location_id}'
 
         self.generated_name = name
         self.target_url = f'{url_base}?{params}'
