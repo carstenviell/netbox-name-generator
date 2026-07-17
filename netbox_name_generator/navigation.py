@@ -8,6 +8,10 @@ menu_items = (
         link_text='Name Generator',
     ),
     PluginMenuItem(
+        link='plugins:netbox_name_generator:konfiguration',
+        link_text=_('Settings'),
+    ),
+    PluginMenuItem(
         link='plugins:netbox_name_generator:standort_list',
         link_text=_('Sites'),
         buttons=(

@@ -2,6 +2,7 @@ from django.urls import path
 
 from .views import (
     NameGeneratorView,
+    NamierungsKonfigurationView,
     NetzwerkgeraetFunktionChangeLogView,
     NetzwerkgeraetFunktionDeleteView,
     NetzwerkgeraetFunktionEditView,
@@ -33,6 +34,9 @@ app_name = 'netbox_name_generator'
 urlpatterns = [
     # Name Generator (Hauptseite)
     path('', NameGeneratorView.as_view(), name='index'),
+
+    # Konfiguration (Singleton)
+    path('konfiguration/', NamierungsKonfigurationView.as_view(), name='konfiguration'),
 
     # Standorte
     path('standorte/', StandortListView.as_view(), name='standort_list'),

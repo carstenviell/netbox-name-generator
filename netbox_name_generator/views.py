@@ -6,6 +6,7 @@ from netbox.views import generic
 
 from .forms import NameGeneratorForm
 from .model_forms import (
+    NamierungsKonfigurationForm,
     NetzwerkgeraetFunktionForm,
     NetzwerkgeraetTypForm,
     ServerZweckForm,
@@ -14,6 +15,7 @@ from .model_forms import (
     VmFunktionForm,
 )
 from .models import (
+    NamierungsKonfiguration,
     NetzwerkgeraetFunktion,
     NetzwerkgeraetTyp,
     ServerZweck,
@@ -239,3 +241,19 @@ class VmFunktionDeleteView(generic.ObjectDeleteView):
 
 class VmFunktionChangeLogView(generic.ObjectChangeLogView):
     queryset = VmFunktion.objects.all()
+
+
+# ---------------------------------------------------------------------------
+# NamierungsKonfiguration (Singleton)
+# ---------------------------------------------------------------------------
+
+class NamierungsKonfigurationView(generic.ObjectEditView):
+    queryset = NamierungsKonfiguration.objects.all()
+    form = NamierungsKonfigurationForm
+
+    def get_object(self, **kwargs):
+        obj, _ = NamierungsKonfiguration.objects.get_or_create(pk=1)
+        return obj
+
+    def get_return_url(self, request, obj=None):
+        return reverse('plugins:netbox_name_generator:konfiguration')

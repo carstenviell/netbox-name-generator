@@ -4,6 +4,7 @@ from netbox.forms import NetBoxModelForm
 from utilities.forms.fields import DynamicModelChoiceField
 
 from .models import (
+    NamierungsKonfiguration,
     NetzwerkgeraetFunktion,
     NetzwerkgeraetTyp,
     ServerZweck,
@@ -29,7 +30,7 @@ class StandortForm(NetBoxModelForm):
 class NetzwerkgeraetTypForm(NetBoxModelForm):
     class Meta:
         model = NetzwerkgeraetTyp
-        fields = ('kuerzel', 'beschreibung', 'hat_funktion', 'tags')
+        fields = ('kuerzel', 'beschreibung', 'hat_funktion', 'zaehlung_strategie', 'tags')
 
 
 class NetzwerkgeraetFunktionForm(NetBoxModelForm):
@@ -54,3 +55,9 @@ class VmFunktionForm(NetBoxModelForm):
     class Meta:
         model = VmFunktion
         fields = ('kuerzel', 'beschreibung', 'tags')
+
+
+class NamierungsKonfigurationForm(NetBoxModelForm):
+    class Meta:
+        model = NamierungsKonfiguration
+        fields = ('max_laenge', 'nummer_stellen', 'strategie_netzwerkgeraet', 'strategie_server', 'strategie_pc', 'tags')

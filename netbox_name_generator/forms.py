@@ -248,25 +248,33 @@ class NameGeneratorForm(forms.Form):
         }
         standort_kuerzel = standort_kuerzel_map.get(system_type, '')
 
+        from .models import NamierungsKonfiguration
+        cfg = NamierungsKonfiguration.objects.first()
+        max_laenge               = cfg.max_laenge               if cfg else 15
+        nummer_stellen           = cfg.nummer_stellen           if cfg else 2
+        strategie_netzwerkgeraet = cfg.strategie_netzwerkgeraet if cfg else 'ohne_rack'
+        strategie_server         = cfg.strategie_server         if cfg else 'praefix'
+        strategie_pc             = cfg.strategie_pc             if cfg else 'praefix'
+
         try:
             if system_type == 'netzwerkgeraet':
-                name = self._clean_netzwerkgeraet(cleaned, existing_names)
+                name = self._clean_netzwerkgeraet(cleaned, existing_names, max_laenge, nummer_stellen, strategie_netzwerkgeraet)
                 url_base = reverse('dcim:device_add')
 
             elif system_type == 'server':
-                name = self._clean_server(cleaned, existing_names)
+                name = self._clean_server(cleaned, existing_names, max_laenge, nummer_stellen, strategie_server)
                 url_base = reverse('dcim:device_add')
 
             elif system_type == 'pc':
-                name = self._clean_pc(cleaned, existing_names)
+                name = self._clean_pc(cleaned, existing_names, max_laenge, nummer_stellen, strategie_pc)
                 url_base = reverse('dcim:device_add')
 
             elif system_type == 'notebook':
-                name = self._clean_notebook(cleaned)
+                name = self._clean_notebook(cleaned, max_laenge)
                 url_base = reverse('dcim:device_add')
 
             elif system_type == 'vm':
-                name = self._clean_vm(cleaned, existing_names)
+                name = self._clean_vm(cleaned, existing_names, max_laenge, nummer_stellen)
                 url_base = reverse('virtualization:virtualmachine_add')
 
             else:
@@ -311,7 +319,7 @@ class NameGeneratorForm(forms.Form):
 
     # --- Typ-spezifische clean-Methoden ---
 
-    def _clean_netzwerkgeraet(self, cleaned: dict, existing_names: set) -> str:
+    def _clean_netzwerkgeraet(self, cleaned: dict, existing_names: set, max_laenge: int = 15, nummer_stellen: int = 2, strategie: str = 'ohne_rack') -> str:
         from .models import NetzwerkgeraetTyp
 
         standort = cleaned.get('ng_standort', '')
@@ -326,9 +334,8 @@ class NameGeneratorForm(forms.Form):
         if not rackid:
             raise forms.ValidationError(_('Please enter a Rack ID.'))
 
-        # Prüfen ob der Typ eine Funktion erfordert
         try:
-            typ_obj = NetzwerkgeraetTyp.objects.get(kuerzel=typ)
+            typ_obj      = NetzwerkgeraetTyp.objects.get(kuerzel=typ)
             hat_funktion = typ_obj.hat_funktion
         except NetzwerkgeraetTyp.DoesNotExist:
             hat_funktion = True
@@ -339,9 +346,9 @@ class NameGeneratorForm(forms.Form):
             if not funktion:
                 raise forms.ValidationError(_('Please select a function for the network device.'))
 
-        return generate_netzwerkgeraet(standort, typ, funktion, rackid, existing_names)
+        return generate_netzwerkgeraet(standort, typ, funktion, rackid, existing_names, max_laenge, nummer_stellen, strategie)
 
-    def _clean_server(self, cleaned: dict, existing_names: set) -> str:
+    def _clean_server(self, cleaned: dict, existing_names: set, max_laenge: int = 15, nummer_stellen: int = 2, strategie: str = 'praefix') -> str:
         standort   = cleaned.get('srv_standort', '')
         zweck      = cleaned.get('srv_zweck', '')
         zweck_frei = cleaned.get('srv_zweck_frei', '').upper().strip()
@@ -356,9 +363,9 @@ class NameGeneratorForm(forms.Form):
         elif not zweck:
             raise forms.ValidationError(_('Please select a purpose for the server.'))
 
-        return generate_server(standort, zweck, existing_names)
+        return generate_server(standort, zweck, existing_names, max_laenge, nummer_stellen, strategie)
 
-    def _clean_pc(self, cleaned: dict, existing_names: set) -> str:
+    def _clean_pc(self, cleaned: dict, existing_names: set, max_laenge: int = 15, nummer_stellen: int = 2, strategie: str = 'praefix') -> str:
         standort     = cleaned.get('pc_standort', '')
         kennung_type = cleaned.get('pc_kennung_type', 'abteilung')
         kennung      = cleaned.get('pc_kennung', '').upper().strip()
@@ -368,17 +375,17 @@ class NameGeneratorForm(forms.Form):
         if not kennung:
             raise forms.ValidationError(_('Please enter a code or inventory number.'))
 
-        return generate_pc(standort, kennung_type, kennung, existing_names)
+        return generate_pc(standort, kennung_type, kennung, existing_names, max_laenge, nummer_stellen, strategie)
 
-    def _clean_notebook(self, cleaned: dict) -> str:
+    def _clean_notebook(self, cleaned: dict, max_laenge: int = 15) -> str:
         kuerzel = cleaned.get('nb_kuerzel', '').upper().strip()
 
         if not kuerzel:
             raise forms.ValidationError(_('Please enter a user code.'))
 
-        return generate_notebook(kuerzel)
+        return generate_notebook(kuerzel, max_laenge)
 
-    def _clean_vm(self, cleaned: dict, existing_names: set) -> str:
+    def _clean_vm(self, cleaned: dict, existing_names: set, max_laenge: int = 15, nummer_stellen: int = 2) -> str:
         bereich       = cleaned.get('vm_bereich', '')
         funktion      = cleaned.get('vm_funktion', '')
         funktion_frei = cleaned.get('vm_funktion_frei', '').upper().strip()
@@ -393,4 +400,4 @@ class NameGeneratorForm(forms.Form):
         elif not funktion:
             raise forms.ValidationError(_('Please select a function for the VM.'))
 
-        return generate_vm(bereich, funktion, existing_names)
+        return generate_vm(bereich, funktion, existing_names, max_laenge, nummer_stellen)
