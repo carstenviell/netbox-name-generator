@@ -67,7 +67,7 @@ docker run --rm \
   --network netbox-docker_default \
   --env-file ~/dev/netbox/netbox-docker/env/netbox.env \
   -v /tmp/netbox-config-dev:/etc/netbox/config:ro \
-  -v ~/dev/netbox/NamingProcess/netbox_name_generator/migrations:/migrations-output \
+  -v ~/dev/netbox/netbox-name-generator/netbox_name_generator/migrations:/migrations-output \
   --workdir /opt/netbox/netbox --entrypoint "" \
   docker.io/netboxcommunity/netbox:v4.5-4.0.1 \
   bash -c "/opt/netbox/venv/bin/python manage.py makemigrations netbox_name_generator && \
