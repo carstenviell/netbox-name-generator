@@ -4,6 +4,13 @@ Alle wesentlichen Änderungen an diesem Projekt werden hier dokumentiert.
 
 Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [1.4.2] - 2026-08-01
+
+### Sicherheit
+- **Git-Historie bereinigt**: Der in CRITICAL-01 (`SECURITY-ANALYSE-2026-08-01.md`) dokumentierte private SSH-Schlüssel (`ssh_carstenviell`/`ssh_carstenviell.pub`, ursprünglich in einem Commit von 2026-03-14 versehentlich eingecheckt) wurde per `git filter-repo` aus **jedem** Commit der Historie entfernt und die bereinigte Historie per Force-Push auf `main` sowie alle betroffenen Release-Tags (`v1.3.0`–`v1.4.1`) angewendet. Commit-Hashes ab dem betroffenen Commit haben sich dadurch geändert (`v1.1.0`–`v1.2.1` unverändert, da vor der Einführung des Schlüssels).
+- **Wichtig für bestehende Klone/Forks**: Ein `git pull` auf einem alten Klon führt zu divergierender Historie. Empfehlung: Repository neu klonen (`git clone`), lokale Änderungen vorher sichern. GitHubs eigene Caches/Forks/PR-Referenzen auf die alten Commits sind von dieser Bereinigung nicht erfasst — falls relevant, GitHub Support kontaktieren.
+- Der exponierte Schlüssel gilt unabhängig von dieser Bereinigung weiterhin als kompromittiert und sollte, falls noch nicht geschehen, umgehend rotiert/widerrufen werden.
+
 ## [1.4.1] - 2026-08-01
 
 ### Sicherheit
