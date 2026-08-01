@@ -1,4 +1,4 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views import View
@@ -39,19 +39,24 @@ TEMPLATE = 'netbox_name_generator/name_generator.html'
 # Name Generator (Hauptansicht)
 # ---------------------------------------------------------------------------
 
-class NameGeneratorView(LoginRequiredMixin, View):
+class NameGeneratorView(PermissionRequiredMixin, View):
     """
     GET:  Formular anzeigen
     POST: Formular validieren → bei Erfolg Redirect zu NetBox-Erstellungsseite
           mit vorausgefülltem ?name=...-Parameter
     """
+    # The generator only ever leads to creating a Device or VirtualMachine
+    # (see clean()'s url_base) - gated on those target permissions rather than
+    # just being logged in, since it exposes the full rack/site topology and
+    # (indirectly) which device/VM names are already taken.
+    permission_required = ('dcim.add_device', 'virtualization.add_virtualmachine')
 
     def get(self, request):
-        form = NameGeneratorForm()
+        form = NameGeneratorForm(user=request.user)
         return render(request, TEMPLATE, {'form': form})
 
     def post(self, request):
-        form = NameGeneratorForm(request.POST)
+        form = NameGeneratorForm(request.POST, user=request.user)
         if form.is_valid():
             return redirect(form.target_url)
         return render(request, TEMPLATE, {'form': form})

@@ -4,6 +4,16 @@ Alle wesentlichen Änderungen an diesem Projekt werden hier dokumentiert.
 
 Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [1.4.1] - 2026-08-01
+
+### Sicherheit
+- Stored XSS behoben: Die JSON-Konfiguration für den Name-Generator wurde per `json.dumps()` + `|safe` in einen `<script>`-Block gerendert, wodurch ein `beschreibung`-Feld (z. B. bei `NetzwerkgeraetFunktion`) mit einer `</script>`-Sequenz aus dem Skript-Block ausbrechen konnte (Session-Kompromittierung jedes Nutzers, der die Startseite öffnet, ausgelöst von einem Nutzer mit deutlich geringerem Privileg). Template nutzt jetzt Djangos `|json_script`-Filter, der HTML-sicher escaped
+- Defense in Depth: `beschreibung`-Felder aller sechs Konfigurationsmodelle (`Standort`, `NetzwerkgeraetTyp`, `NetzwerkgeraetFunktion`, `ServerZweck`, `VmBereich`, `VmFunktion`) lassen die Zeichen `<`/`>` nicht mehr zu
+- `NameGeneratorView` prüfte bisher nur Login, keine Berechtigung, und lieferte dadurch jedem eingeloggten Nutzer die vollständige Rack-/Standort-Topologie sowie (indirekt) den Geräte-/VM-Namensbestand. Erfordert jetzt `dcim.add_device` und `virtualization.add_virtualmachine`; die Rack-Liste wird zusätzlich auf `.restrict(user, 'view')` gefiltert
+
+### Bekannt / zurückgestellt
+- Race Condition bei der Namensvergabe (TOCTOU zwischen Namensvorschlag und tatsächlicher Objekterstellung durch den Nutzer) bewusst nicht behoben — erfordert eine Architekturentscheidung (z. B. sofortige Platzhalter-Objekterstellung), siehe `SECURITY-ANALYSE-2026-08-01.md`
+
 ## [1.4.0] - 2026-07-17
 
 ### Neu

@@ -9,6 +9,16 @@ kuerzel_validator = RegexValidator(
     _('Only uppercase letters (A–Z) and digits (0–9) allowed.'),
 )
 
+# Defense in depth for HIGH-01 (stored XSS): "beschreibung" values flow into a
+# JSON structure embedded on the name-generator page. The template now uses
+# |json_script (HTML-escapes safely regardless of content), but this blocks
+# HTML metacharacters at the source too, since a free-text description field
+# has no legitimate need for them.
+beschreibung_validator = RegexValidator(
+    r'^[^<>]*$',
+    _('The characters < and > are not allowed.'),
+)
+
 ZAEHLUNG_NG_CHOICES = [
     ('ohne_rack', _('Without Rack Suffix (number unique per location/type/function)')),
     ('vollstaendig', _('Full Name (number unique per rack — same number may appear in different racks)')),
@@ -28,7 +38,9 @@ class Standort(NetBoxModel):
         validators=[kuerzel_validator],
         verbose_name=_('Abbreviation'),
     )
-    beschreibung = models.CharField(max_length=100, blank=True, verbose_name=_('Description'))
+    beschreibung = models.CharField(
+        max_length=100, blank=True, validators=[beschreibung_validator], verbose_name=_('Description'),
+    )
     site = models.ForeignKey(
         'dcim.Site',
         on_delete=models.SET_NULL,
@@ -61,7 +73,9 @@ class NetzwerkgeraetTyp(NetBoxModel):
         validators=[kuerzel_validator],
         verbose_name=_('Abbreviation'),
     )
-    beschreibung = models.CharField(max_length=100, blank=True, verbose_name=_('Description'))
+    beschreibung = models.CharField(
+        max_length=100, blank=True, validators=[beschreibung_validator], verbose_name=_('Description'),
+    )
     hat_funktion = models.BooleanField(
         default=True,
         verbose_name=_('Has Function'),
@@ -100,7 +114,9 @@ class NetzwerkgeraetFunktion(NetBoxModel):
         validators=[kuerzel_validator],
         verbose_name=_('Abbreviation'),
     )
-    beschreibung = models.CharField(max_length=100, blank=True, verbose_name=_('Description'))
+    beschreibung = models.CharField(
+        max_length=100, blank=True, validators=[beschreibung_validator], verbose_name=_('Description'),
+    )
 
     class Meta:
         ordering = ['typ__kuerzel', 'kuerzel']
@@ -123,7 +139,9 @@ class ServerZweck(NetBoxModel):
         validators=[kuerzel_validator],
         verbose_name=_('Abbreviation'),
     )
-    beschreibung = models.CharField(max_length=100, blank=True, verbose_name=_('Description'))
+    beschreibung = models.CharField(
+        max_length=100, blank=True, validators=[beschreibung_validator], verbose_name=_('Description'),
+    )
 
     class Meta:
         ordering = ['kuerzel']
@@ -145,7 +163,9 @@ class VmBereich(NetBoxModel):
         validators=[kuerzel_validator],
         verbose_name=_('Abbreviation'),
     )
-    beschreibung = models.CharField(max_length=100, blank=True, verbose_name=_('Description'))
+    beschreibung = models.CharField(
+        max_length=100, blank=True, validators=[beschreibung_validator], verbose_name=_('Description'),
+    )
 
     class Meta:
         ordering = ['kuerzel']
@@ -167,7 +187,9 @@ class VmFunktion(NetBoxModel):
         validators=[kuerzel_validator],
         verbose_name=_('Abbreviation'),
     )
-    beschreibung = models.CharField(max_length=100, blank=True, verbose_name=_('Description'))
+    beschreibung = models.CharField(
+        max_length=100, blank=True, validators=[beschreibung_validator], verbose_name=_('Description'),
+    )
 
     class Meta:
         ordering = ['kuerzel']

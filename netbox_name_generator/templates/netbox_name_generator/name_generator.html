@@ -242,15 +242,22 @@
 
 {% block javascript %}
 {{ block.super }}
+{# json_script HTML-escapes </script>/</ etc. inside string values - unlike
+   json.dumps()+|safe, which does not, and let stored "beschreibung" values
+   break out of the script block below (stored XSS, see SECURITY-ANALYSE). #}
+{{ form.ng_funktionen_json|json_script:"ng-funktionen-data" }}
+{{ form.ng_typ_hat_funktion_json|json_script:"ng-typ-hat-funktion-data" }}
+{{ form.ng_standort_site_json|json_script:"ng-standort-site-data" }}
+{{ form.ng_racks_json|json_script:"ng-racks-data" }}
 <script>
 (function () {
   'use strict';
 
   // Konfiguration aus dem Server (dynamisch aus der DB)
-  const ngFunktionenByTyp  = {{ form.ng_funktionen_json|safe }};
-  const ngTypHatFunktion   = {{ form.ng_typ_hat_funktion_json|safe }};
-  const ngStandortSiteMap  = {{ form.ng_standort_site_json|safe }};
-  const ngRacksBySite      = {{ form.ng_racks_json|safe }};
+  const ngFunktionenByTyp  = JSON.parse(document.getElementById('ng-funktionen-data').textContent);
+  const ngTypHatFunktion   = JSON.parse(document.getElementById('ng-typ-hat-funktion-data').textContent);
+  const ngStandortSiteMap  = JSON.parse(document.getElementById('ng-standort-site-data').textContent);
+  const ngRacksBySite      = JSON.parse(document.getElementById('ng-racks-data').textContent);
 
   // Alle Typ-Sektionen ausblenden, eine einblenden
   function showSection(type) {

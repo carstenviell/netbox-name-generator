@@ -1,5 +1,3 @@
-import json
-
 from django import forms
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
@@ -133,8 +131,9 @@ class NameGeneratorForm(forms.Form):
     generated_name: str = ''
     target_url: str = ''
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
+        self.user = user
 
         # Lazy Import, damit name_logic testbar ohne Django bleibt
         from .models import (
@@ -210,20 +209,31 @@ class NameGeneratorForm(forms.Form):
             ]
             typ_hat_funktion[t.kuerzel] = t.hat_funktion
 
-        self.ng_funktionen_json = json.dumps(funktionen_by_typ)
-        self.ng_typ_hat_funktion_json = json.dumps(typ_hat_funktion)
+        # Raw Python objects, not json.dumps() strings - rendered via the
+        # |json_script template filter, which HTML-escapes </script> etc.
+        # itself. json.dumps()+|safe (the previous approach) does NOT escape
+        # "</script>" inside string values, letting a "beschreibung" field
+        # break out of the <script> block (stored XSS).
+        self.ng_funktionen_json = funktionen_by_typ
+        self.ng_typ_hat_funktion_json = typ_hat_funktion
 
         # Standort → site_id und Racks pro site_id für JS
         from dcim.models import Rack
         standort_site_map = {s.kuerzel: s.site_id for s in standorte if s.site_id}
         site_ids = list(standort_site_map.values())
         racks_by_site: dict[int, list] = {}
-        for rack in Rack.objects.filter(site_id__in=site_ids).select_related('location').order_by('name'):
+        # .restrict(): only surface racks the requesting user is actually
+        # permitted to view, instead of the full cross-site rack topology
+        # regardless of the user's NetBox object permissions.
+        rack_qs = Rack.objects.filter(site_id__in=site_ids).select_related('location').order_by('name')
+        if self.user is not None:
+            rack_qs = rack_qs.restrict(self.user, 'view')
+        for rack in rack_qs:
             label_text = f'{rack.name} ({rack.location.name})' if rack.location_id else rack.name
             racks_by_site.setdefault(rack.site_id, []).append({'v': rack.name, 'l': label_text})
 
-        self.ng_standort_site_json = json.dumps(standort_site_map)
-        self.ng_racks_json = json.dumps(racks_by_site)
+        self.ng_standort_site_json = standort_site_map
+        self.ng_racks_json = racks_by_site
 
     def clean(self):
         cleaned = super().clean()
@@ -235,6 +245,12 @@ class NameGeneratorForm(forms.Form):
         from dcim.models import Device
         from virtualization.models import VirtualMachine
 
+        # Deliberately NOT restricted to user-visible objects (unlike the Rack
+        # query above): the naming policy requires system-wide uniqueness
+        # (see CLAUDE.md), so a restricted user must still collide-check
+        # against every name, not just the ones they're permitted to see -
+        # otherwise this would suggest an already-taken name. Only a name's
+        # bare existence is exposed this way, not the underlying object.
         existing_names: set[str] = (
             set(Device.objects.values_list('name', flat=True))
             | set(VirtualMachine.objects.values_list('name', flat=True))

@@ -13,3 +13,6 @@ ssh_carstenviell.pub
 *.mo
 
 CLAUDE.md
+
+# Interne Security-Audit-Berichte (Angriffsszenarien/Zeilenverweise, nicht für öffentliches Repo)
+SECURITY-ANALYSE-*.md
