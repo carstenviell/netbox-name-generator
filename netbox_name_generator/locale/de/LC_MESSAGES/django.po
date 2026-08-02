@@ -297,3 +297,6 @@ msgstr "Direkt übernommen, keine Auto-Nummerierung"
 
 msgid "characters"
 msgstr "Zeichen"
+
+msgid "The name \"%(name)s\" was just reserved by another, concurrent request. Please try again."
+msgstr "Der Name \"%(name)s\" wurde soeben durch eine gleichzeitige Anfrage reserviert. Bitte erneut versuchen."

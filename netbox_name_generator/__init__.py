@@ -5,7 +5,7 @@ class NameGeneratorConfig(PluginConfig):
     name = 'netbox_name_generator'
     verbose_name = 'Name Generator'
     description = 'Automatically generates device names based on configurable parameters. Once confirmed, navigates directly to the device creation form.'
-    version = '1.4.2'
+    version = '1.4.3'
     author = 'Carsten Viell'
     base_url = 'name-generator'
 

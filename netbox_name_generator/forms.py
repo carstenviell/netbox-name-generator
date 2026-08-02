@@ -244,6 +244,7 @@ class NameGeneratorForm(forms.Form):
 
         from dcim.models import Device
         from virtualization.models import VirtualMachine
+        from .models import active_reserved_names, reserve_name
 
         # Deliberately NOT restricted to user-visible objects (unlike the Rack
         # query above): the naming policy requires system-wide uniqueness
@@ -251,9 +252,15 @@ class NameGeneratorForm(forms.Form):
         # against every name, not just the ones they're permitted to see -
         # otherwise this would suggest an already-taken name. Only a name's
         # bare existence is exposed this way, not the underlying object.
+        # Also includes short-lived ReservedName rows (MEDIUM-02) - without
+        # them, two concurrent generations could read the same "next free
+        # number" snapshot and suggest the identical name, since this plugin
+        # only redirects to NetBox's own add-device/VM page rather than
+        # creating the object itself.
         existing_names: set[str] = (
             set(Device.objects.values_list('name', flat=True))
             | set(VirtualMachine.objects.values_list('name', flat=True))
+            | active_reserved_names()
         )
 
         # Standort-Kürzel je Systemtyp ermitteln (für Site-Vorausfüllung)
@@ -271,6 +278,11 @@ class NameGeneratorForm(forms.Form):
         strategie_netzwerkgeraet = cfg.strategie_netzwerkgeraet if cfg else 'ohne_rack'
         strategie_server         = cfg.strategie_server         if cfg else 'praefix'
         strategie_pc             = cfg.strategie_pc             if cfg else 'praefix'
+
+        # Only the auto-numbered types race against a shared counter; a
+        # notebook name is deterministic from the user's own input (no
+        # _naechste_nummer() call), so there's nothing to reserve.
+        numbered_type = system_type in ('netzwerkgeraet', 'server', 'pc', 'vm')
 
         try:
             if system_type == 'netzwerkgeraet':
@@ -298,6 +310,17 @@ class NameGeneratorForm(forms.Form):
 
         except ValueError as exc:
             raise forms.ValidationError(str(exc)) from exc
+
+        if numbered_type and not reserve_name(name):
+            # Someone else generated and reserved this exact name in the
+            # window between our existing_names snapshot and here - fail
+            # loudly rather than hand out a name two people might now both
+            # try to create. Re-submitting recomputes with the now-reserved
+            # name correctly counted as taken.
+            raise forms.ValidationError(_(
+                'The name "%(name)s" was just reserved by another, concurrent request. '
+                'Please try again.'
+            ) % {'name': name})
 
         # Site-ID des gewählten Standorts ermitteln
         site_id = None

@@ -1,6 +1,9 @@
+from datetime import timedelta
+
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator
-from django.db import models
+from django.db import IntegrityError, models, transaction
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from netbox.models import NetBoxModel
 
@@ -251,3 +254,48 @@ class NamierungsKonfiguration(NetBoxModel):
     def get_absolute_url(self):
         from django.urls import reverse
         return reverse('plugins:netbox_name_generator:konfiguration')
+
+
+# MEDIUM-02 mitigation: the plugin never creates a Device/VirtualMachine
+# itself - it only redirects to NetBox's own creation page with a prefilled
+# ?name=..., so the actual object may not be saved until the user finishes
+# that separate form (possibly minutes later). Without this, two concurrent
+# generations for the same site/type/function could both read the same
+# "next free number" snapshot and suggest the identical name. A short-lived
+# reservation row, inserted atomically (unique constraint) at generation
+# time and counted alongside real Device/VirtualMachine names, closes that
+# window without the plugin having to create a full placeholder object with
+# a guessed site/role/device_type. Reservations are cheap to let expire -
+# an abandoned generation just frees the name back up after RESERVATION_TTL.
+class ReservedName(models.Model):
+    name = models.CharField(max_length=63, unique=True)
+    reserved_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+
+
+RESERVATION_TTL = timedelta(minutes=10)
+
+
+def active_reserved_names():
+    """Active (non-expired) reservations, to be unioned into the caller's
+    existing-names collision set. Opportunistically deletes expired rows so
+    the table doesn't grow unbounded - an abandoned generation (user never
+    finished the NetBox add-device/VM form) just frees the name back up,
+    no separate cleanup job needed."""
+    ReservedName.objects.filter(reserved_at__lt=timezone.now() - RESERVATION_TTL).delete()
+    return set(ReservedName.objects.values_list('name', flat=True))
+
+
+def reserve_name(name):
+    """Atomically reserve `name` via the unique constraint. Returns True if
+    reserved, False if another request reserved the exact same name in the
+    (small) window between the caller's own existing-names snapshot and
+    this call - the residual race active_reserved_names() alone can't close."""
+    try:
+        with transaction.atomic():
+            ReservedName.objects.create(name=name)
+        return True
+    except IntegrityError:
+        return False

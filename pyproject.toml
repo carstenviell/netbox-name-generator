@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "netbox-name-generator"
-version = "1.4.2"
+version = "1.4.3"
 description = "NetBox plugin that automatically generates device names based on configurable parameters"
 authors = [{ name = "Carsten Viell" }]
 license = { text = "Apache-2.0" }

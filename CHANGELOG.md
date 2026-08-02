@@ -4,6 +4,11 @@ Alle wesentlichen Änderungen an diesem Projekt werden hier dokumentiert.
 
 Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [1.4.3] - 2026-08-02
+
+### Sicherheit
+- Race Condition bei der Namensvergabe entschärft: Das Plugin legt nie selbst ein Objekt an, sondern leitet mit vorausgefülltem `?name=...` zur NetBox-Erstellungsseite weiter, die der Nutzer separat (ggf. Minuten später) ausfüllt — zwei gleichzeitige Generierungen konnten bisher denselben Namensvorschlag erhalten. Neues Modell `ReservedName` (Unique-Constraint, 10-Minuten-TTL) reserviert generierte Namen atomar: der Normalfall wird proaktiv verhindert (Reservierungen fließen in die Kollisionsprüfung ein), eine echte gleichzeitige Kollision wird über den DB-Constraint abgefangen und dem Nutzer mit Aufforderung zum erneuten Versuch gemeldet. Gilt für alle auto-nummerierten Typen (Netzwerkgerät/Server/PC/VM); Notebook-Namen sind deterministisch und daher nicht betroffen. Live gegen den Container verifiziert (Normalfall, erzwungene Kollision, TTL-Ablauf)
+
 ## [1.4.2] - 2026-08-01
 
 ### Sicherheit
