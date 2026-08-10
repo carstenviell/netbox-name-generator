@@ -4,6 +4,11 @@ Alle wesentlichen Änderungen an diesem Projekt werden hier dokumentiert.
 
 Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [1.4.4] - 2026-08-10
+
+### Behoben
+- Formular zeigte nach Auswahl des System Type keine weiteren Felder mehr an: Der beim XSS-Fix (v1.4.1) über den `json_script`-Tags eingefügte Erklärkommentar nutzte die mehrzeilige `{# ... #}`-Syntax, die Django nur einzeilig unterstützt. Dadurch wurde der Kommentar wortwörtlich in die Seite gerendert; die darin enthaltene `</`-Sequenz ließ den Browser das direkt folgende `<script id="ng-funktionen-data">`-Tag als ungültigen Kommentar verschlucken, wodurch `document.getElementById(...)` `null` lieferte und das gesamte Formular-JavaScript (inkl. Dropdown-Umschaltung) mit einer `TypeError` abbrach, bevor es initialisiert war. Kommentar auf `{% comment %}...{% endcomment %}` umgestellt
+
 ## [1.4.3] - 2026-08-02
 
 ### Sicherheit
