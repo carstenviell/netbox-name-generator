@@ -242,9 +242,11 @@
 
 {% block javascript %}
 {{ block.super }}
-{# json_script HTML-escapes </script>/</ etc. inside string values - unlike
-   json.dumps()+|safe, which does not, and let stored "beschreibung" values
-   break out of the script block below (stored XSS, see SECURITY-ANALYSE). #}
+{% comment %}
+json_script HTML-escapes </script>/</ etc. inside string values - unlike
+json.dumps()+|safe, which does not, and let stored "beschreibung" values
+break out of the script block below (stored XSS, see SECURITY-ANALYSE).
+{% endcomment %}
 {{ form.ng_funktionen_json|json_script:"ng-funktionen-data" }}
 {{ form.ng_typ_hat_funktion_json|json_script:"ng-typ-hat-funktion-data" }}
 {{ form.ng_standort_site_json|json_script:"ng-standort-site-data" }}
