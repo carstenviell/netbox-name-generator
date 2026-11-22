@@ -2,13 +2,12 @@
 # Copyright (C) 2026 Carsten Viell
 msgid ""
 msgstr ""
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-22 14:59+0100\n"
+"Language: de\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: de\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-
-msgid "System Type"
-msgstr "Systemtyp"
 
 msgid "— Select System Type —"
 msgstr "— Systemtyp wählen —"
@@ -31,6 +30,9 @@ msgstr "Abteilungskürzel (mit Auto-Nummerierung)"
 msgid "Inventory Number (direct)"
 msgstr "Inventarnummer (direkt)"
 
+msgid "System Type"
+msgstr "Systemtyp"
+
 msgid "Site"
 msgstr "Standort"
 
@@ -43,11 +45,17 @@ msgstr "Funktion"
 msgid "Rack ID"
 msgstr "Rack-ID"
 
+msgid "e.g. NGV"
+msgstr "z. B. NGV"
+
 msgid "Purpose"
 msgstr "Zweck"
 
 msgid "Purpose (free-text, max. 4 characters)"
 msgstr "Zweck (Freitext, max. 4 Zeichen)"
+
+msgid "e.g. BKUP"
+msgstr "z. B. BKUP"
 
 msgid "Identifier Type"
 msgstr "Kennungstyp"
@@ -55,14 +63,23 @@ msgstr "Kennungstyp"
 msgid "Code / Inventory Number"
 msgstr "Kürzel / Inventarnummer"
 
+msgid "e.g. MARK or INV0042"
+msgstr "z. B. MARK oder INV0042"
+
 msgid "User Code"
 msgstr "Benutzerkürzel"
+
+msgid "e.g. SMITHJ"
+msgstr "z. B. SCHMIDTH"
 
 msgid "Area"
 msgstr "Bereich"
 
 msgid "Function (free-text, max. 3 characters)"
 msgstr "Funktion (Freitext, max. 3 Zeichen)"
+
+msgid "e.g. MON"
+msgstr "z. B. MON"
 
 msgid "— Site —"
 msgstr "— Standort —"
@@ -87,6 +104,14 @@ msgstr "Bitte einen Systemtyp auswählen."
 
 msgid "Unknown system type:"
 msgstr "Unbekannter Systemtyp:"
+
+#, python-format
+msgid ""
+"The name \"%(name)s\" was just reserved by another, concurrent request. "
+"Please try again."
+msgstr ""
+"Der Name \"%(name)s\" wurde soeben durch eine gleichzeitige Anfrage "
+"reserviert. Bitte erneut versuchen."
 
 msgid "Please select a site for the network device."
 msgstr "Bitte einen Standort für das Netzwerkgerät wählen."
@@ -127,17 +152,43 @@ msgstr "Bitte eine Freitext-Funktion eingeben."
 msgid "Please select a function for the VM."
 msgstr "Bitte eine Funktion für die VM wählen."
 
+msgid "NetBox Site"
+msgstr "NetBox-Site"
+
+msgid "Link to NetBox site – pre-filled when creating a device."
+msgstr ""
+"Verknüpfung mit dem NetBox-Standort – wird beim Gerät-Anlegen vorausgefüllt."
+
+msgid "Only uppercase letters (A–Z) and digits (0–9) allowed."
+msgstr "Nur Großbuchstaben (A–Z) und Ziffern (0–9) erlaubt."
+
+msgid "The characters < and > are not allowed."
+msgstr "Die Zeichen < und > sind nicht erlaubt."
+
+msgid "Without Rack Suffix (number unique per location/type/function)"
+msgstr "Ohne Rack-Suffix (Nummer eindeutig je Standort/Typ/Funktion)"
+
+msgid ""
+"Full Name (number unique per rack — same number may appear in different "
+"racks)"
+msgstr ""
+"Vollständiger Name (Nummer eindeutig je Rack – dieselbe Nummer darf in "
+"verschiedenen Racks vorkommen)"
+
+msgid "Cross-location (number globally unique per type/function)"
+msgstr "Standortübergreifend (Nummer global eindeutig je Typ/Funktion)"
+
+msgid "Location-local (number unique per location/purpose)"
+msgstr "Standortbezogen (Nummer eindeutig je Standort/Zweck)"
+
+msgid "Cross-location (number globally unique per purpose)"
+msgstr "Standortübergreifend (Nummer global eindeutig je Zweck)"
+
 msgid "Abbreviation"
 msgstr "Kürzel"
 
 msgid "Description"
 msgstr "Beschreibung"
-
-msgid "NetBox Site"
-msgstr "NetBox-Site"
-
-msgid "Link to NetBox site – pre-filled when creating a device."
-msgstr "Verknüpfung mit dem NetBox-Standort – wird beim Gerät-Anlegen vorausgefüllt."
 
 msgid "Sites"
 msgstr "Standorte"
@@ -147,6 +198,13 @@ msgstr "Hat Funktion"
 
 msgid "Disable for types without function abbreviation (e.g. AP)"
 msgstr "Deaktivieren für Typen ohne Funktionskürzel (z. B. AP)"
+
+msgid "Counting Strategy"
+msgstr "Zählstrategie"
+
+msgid "Determines how duplicate numbers are detected when generating names."
+msgstr ""
+"Legt fest, wie doppelte Nummern beim Erzeugen von Namen erkannt werden."
 
 msgid "Network Device Type"
 msgstr "Netzwerkgerät-Typ"
@@ -181,8 +239,36 @@ msgstr "VM-Funktion"
 msgid "VM Functions"
 msgstr "VM-Funktionen"
 
-msgid "Only uppercase letters (A–Z) and digits (0–9) allowed."
-msgstr "Nur Großbuchstaben (A–Z) und Ziffern (0–9) erlaubt."
+msgid "Max. Name Length"
+msgstr "Max. Namenslänge"
+
+msgid "Maximum number of characters for generated names (default: 15)."
+msgstr "Maximale Zeichenzahl erzeugter Namen (Standard: 15)."
+
+msgid "Counter Digits"
+msgstr "Stellen des Zählers"
+
+msgid "Number of digits for the auto-counter (default: 2 → 01–99)."
+msgstr "Anzahl der Stellen des automatischen Zählers (Standard: 2 → 01–99)."
+
+msgid "Network Device Counting Strategy"
+msgstr "Zählstrategie Netzwerkgeräte"
+
+msgid "Server Counting Strategy"
+msgstr "Zählstrategie Server"
+
+msgid "PC Counting Strategy"
+msgstr "Zählstrategie PCs"
+
+msgid "Naming Configuration"
+msgstr "Namenskonfiguration"
+
+msgid "Only one naming configuration is allowed. Edit the existing one."
+msgstr ""
+"Es ist nur eine Namenskonfiguration erlaubt. Bitte die vorhandene bearbeiten."
+
+msgid "Settings"
+msgstr "Einstellungen"
 
 msgid "Add Site"
 msgstr "Standort hinzufügen"
@@ -208,16 +294,24 @@ msgstr "VM-Bereich hinzufügen"
 msgid "Add VM Function"
 msgstr "VM-Funktion hinzufügen"
 
+msgid "Generate Name & Add"
+msgstr "Name generieren & hinzufügen"
+
 msgid "Network Device"
 msgstr "Netzwerkgerät"
 
-msgid "Schema: <code>[LOCATION]-[TYPE]-[FUNCTION][NUMBER][RACKID]</code> &mdash; exactly 15 characters"
-msgstr "Schema: <code>[STANDORT]-[TYP]-[FUNKTION][NUMMER][RACKID]</code> &mdash; genau 15 Zeichen"
+msgid ""
+"Schema: <code>[LOCATION]-[TYPE]-[FUNCTION][NUMBER][RACKID]</code> &mdash; "
+"exactly 15 characters"
+msgstr ""
+"Schema: <code>[STANDORT]-[TYP]-[FUNKTION][NUMMER][RACKID]</code> &mdash; "
+"genau 15 Zeichen"
 
 msgid "Example:"
 msgstr "Beispiel:"
 
-msgid "Schema: <code>[LOCATION]-SRV-[PURPOSE][NUMBER]</code> &mdash; 14 characters"
+msgid ""
+"Schema: <code>[LOCATION]-SRV-[PURPOSE][NUMBER]</code> &mdash; 14 characters"
 msgstr "Schema: <code>[STANDORT]-SRV-[ZWECK][NUMMER]</code> &mdash; 14 Zeichen"
 
 msgid "Free-text Purpose"
@@ -226,7 +320,8 @@ msgstr "Freitext-Zweck"
 msgid "Max. 4 characters, A–Z / 0–9"
 msgstr "Max. 4 Zeichen, A–Z / 0–9"
 
-msgid "Schema: <code>[LOCATION]-PC-[IDENTIFIER]</code> &mdash; max. 15 characters"
+msgid ""
+"Schema: <code>[LOCATION]-PC-[IDENTIFIER]</code> &mdash; max. 15 characters"
 msgstr "Schema: <code>[STANDORT]-PC-[KENNUNG]</code> &mdash; max. 15 Zeichen"
 
 msgid "or"
@@ -245,7 +340,8 @@ msgid "Only A–Z and 0–9, max. 12 characters (e.g. SCHMIDTH)"
 msgstr "Nur A–Z und 0–9, max. 12 Zeichen (z. B. SCHMIDTH)"
 
 msgid "Schema: <code>VM-[AREA]-[FUNCTION][NUMBER]</code> &mdash; 12 characters"
-msgstr "Schema: <code>VM-[BEREICH]-[FUNKTION][NUMMER]</code> &mdash; 12 Zeichen"
+msgstr ""
+"Schema: <code>VM-[BEREICH]-[FUNKTION][NUMMER]</code> &mdash; 12 Zeichen"
 
 msgid "Free-text Function"
 msgstr "Freitext-Funktion"
@@ -253,41 +349,23 @@ msgstr "Freitext-Funktion"
 msgid "Max. 3 characters, A–Z / 0–9"
 msgstr "Max. 3 Zeichen, A–Z / 0–9"
 
+msgid "Preview:"
+msgstr "Vorschau:"
+
 msgid "Generate Name & Continue"
 msgstr "Name generieren & weiter"
-
-msgid "Generate Name & Add"
-msgstr "Name generieren & hinzufügen"
 
 msgid "Reset"
 msgstr "Zurücksetzen"
 
-msgid "Reference"
-msgstr "Abkürzungsreferenz"
-
-msgid "Data Center 1"
-msgstr "Rechenzentrum 1"
-
-msgid "Main Building"
-msgstr "Hauptgebäude"
-
-msgid "Secondary Building"
-msgstr "Nebengebäude"
-
-msgid "Building 01"
-msgstr "Gebäude 01"
-
-msgid "Network Devices – Function"
-msgstr "Netzwerkgeräte – Funktion"
-
-msgid "Server – Purpose"
-msgstr "Server – Zweck"
-
-msgid "File Server"
-msgstr "Dateiserver"
-
 msgid "max. 6 characters (no function)"
 msgstr "max. 6 Zeichen (keine Funktion)"
+
+msgid "characters"
+msgstr "Zeichen"
+
+msgid "Rack"
+msgstr "Rack"
 
 msgid "Inventory Number"
 msgstr "Inventarnummer"
@@ -295,8 +373,5 @@ msgstr "Inventarnummer"
 msgid "Used directly, no auto-numbering"
 msgstr "Direkt übernommen, keine Auto-Nummerierung"
 
-msgid "characters"
-msgstr "Zeichen"
-
-msgid "The name \"%(name)s\" was just reserved by another, concurrent request. Please try again."
-msgstr "Der Name \"%(name)s\" wurde soeben durch eine gleichzeitige Anfrage reserviert. Bitte erneut versuchen."
+msgid "e.g."
+msgstr "z. B."

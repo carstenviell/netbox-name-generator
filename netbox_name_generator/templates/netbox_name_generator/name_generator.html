@@ -430,11 +430,11 @@ break out of the script block below (stored XSS, see SECURITY-ANALYSE).
     if (kennungType === 'inventar') {
       if (label) label.textContent = '{% trans "Inventory Number" %}';
       if (hint)  hint.textContent  = '{% trans "Used directly, no auto-numbering" %}';
-      if (input) input.placeholder = 'z. B. INV0042';
+      if (input) input.placeholder = '{{ _("e.g.")|escapejs }} INV0042';
     } else {
       if (label) label.textContent = '{% trans "Department Code" %}';
       if (hint)  hint.textContent  = '{% trans "max. 4 characters, number assigned automatically" %}';
-      if (input) input.placeholder = 'z. B. MARK';
+      if (input) input.placeholder = '{{ _("e.g.")|escapejs }} MARK';
     }
   }
 

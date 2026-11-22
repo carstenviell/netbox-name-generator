@@ -62,7 +62,7 @@ class NameGeneratorForm(forms.Form):
         label=_('Rack ID'),
         max_length=6,
         required=False,
-        widget=forms.TextInput(attrs={'placeholder': 'z. B. NGV'}),
+        widget=forms.TextInput(attrs={'placeholder': _('e.g. NGV')}),
     )
 
     # --- Server ---
@@ -80,7 +80,7 @@ class NameGeneratorForm(forms.Form):
         label=_('Purpose (free-text, max. 4 characters)'),
         max_length=4,
         required=False,
-        widget=forms.TextInput(attrs={'placeholder': 'z. B. BKUP'}),
+        widget=forms.TextInput(attrs={'placeholder': _('e.g. BKUP')}),
     )
 
     # --- Desktop-PC ---
@@ -98,7 +98,7 @@ class NameGeneratorForm(forms.Form):
         label=_('Code / Inventory Number'),
         max_length=10,
         required=False,
-        widget=forms.TextInput(attrs={'placeholder': 'z. B. MARK oder INV0042'}),
+        widget=forms.TextInput(attrs={'placeholder': _('e.g. MARK or INV0042')}),
     )
 
     # --- Notebook ---
@@ -106,7 +106,7 @@ class NameGeneratorForm(forms.Form):
         label=_('User Code'),
         max_length=12,
         required=False,
-        widget=forms.TextInput(attrs={'placeholder': 'z. B. SCHMIDTH'}),
+        widget=forms.TextInput(attrs={'placeholder': _('e.g. SMITHJ')}),
     )
 
     # --- Virtuelle Maschine ---
@@ -124,7 +124,7 @@ class NameGeneratorForm(forms.Form):
         label=_('Function (free-text, max. 3 characters)'),
         max_length=3,
         required=False,
-        widget=forms.TextInput(attrs={'placeholder': 'z. B. MON'}),
+        widget=forms.TextInput(attrs={'placeholder': _('e.g. MON')}),
     )
 
     # Ergebnis-Attribute (werden in clean() gesetzt)
