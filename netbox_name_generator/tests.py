@@ -14,4 +14,4 @@ class TranslationTests(TestCase):
         missing = [m for m in re.findall(r"^msgid \"(.+)\"\nmsgstr \"(?!\")", po, re.M)
                    if m.replace(chr(92) + chr(34), chr(34)) not in catalog]
         self.assertEqual(missing, [], "django.mo is outdated - run makemessages/msgfmt (see CLAUDE.md)")
-        self.assertNotIn("fuzzy", po, "fuzzy entries are guessed translations - fix them")
+        self.assertEqual(re.findall(r'^#, .*fuzzy.*\n(?:#\|.*\n)*msgid "(.*)"', po, re.M), [], "fuzzy (guessed) translations - fix them")

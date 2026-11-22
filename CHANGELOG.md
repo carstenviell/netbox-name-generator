@@ -1,82 +1,89 @@
+**English** | [Deutsch](CHANGELOG.de.md)
+
 # Changelog
 
-Alle wesentlichen Änderungen an diesem Projekt werden hier dokumentiert.
+All notable changes to this project are documented here.
 
-Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
+Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+
+## [Unreleased]
+
+### Changed
+- Documentation in two languages in separate files: `README.md` (English) / `README.de.md` (German), `CHANGELOG.md` / `CHANGELOG.de.md`; added `LICENSE` (Apache-2.0, as declared in `pyproject.toml`).
 
 ## [1.4.5] - 2026-11-22
 
-### Behoben
-- Installationsanleitung: Installation aus dem GitHub-Release-Archiv statt `git+https://…` (im netbox-docker-Image gibt es kein `git`); Varianten für Source-Installation (inkl. `local_requirements.txt`) und netbox-docker, Neustart von Web und Worker, Upgrade.
-- Deutsche Übersetzung wird jetzt kompiliert mitgeliefert (`django.mo`) – vorher nur `.po`, ohne `gettext` auf dem Zielsystem blieb die Oberfläche englisch. Test gegen veraltete/geratene Übersetzungen ergänzt.
-- 19 fehlende Übersetzungen ergänzt (u. a. Einstellungen/Zählstrategien) und zwei falsch geratene korrigiert („Rack“, „Network Device Counting Strategy“).
-- Hartkodierte deutsche Platzhalter („z. B. …“) in Formular und JavaScript durch übersetzbare englische Texte ersetzt – Quellsprache ist durchgehend Englisch.
+### Fixed
+- Installation guide: installation from the GitHub release archive instead of `git+https://…` (the netbox-docker image has no `git`); variants for source installation (incl. `local_requirements.txt`) and netbox-docker, restart of web and worker, upgrade.
+- The German translation is now shipped compiled (`django.mo`) – before only the `.po`; without `gettext` on the target system the UI stayed English. Added a test against outdated/guessed translations.
+- Added 19 missing translations (e.g. settings/counting strategies) and corrected two wrongly guessed ones ("Rack", "Network Device Counting Strategy").
+- Replaced hard-coded German placeholders ("z. B. …") in the form and JavaScript with translatable English texts – the source language is English throughout.
 
 ## [1.4.4] - 2026-08-10
 
-### Behoben
-- Formular zeigte nach Auswahl des System Type keine weiteren Felder mehr an: Der beim XSS-Fix (v1.4.1) über den `json_script`-Tags eingefügte Erklärkommentar nutzte die mehrzeilige `{# ... #}`-Syntax, die Django nur einzeilig unterstützt. Dadurch wurde der Kommentar wortwörtlich in die Seite gerendert; die darin enthaltene `</`-Sequenz ließ den Browser das direkt folgende `<script id="ng-funktionen-data">`-Tag als ungültigen Kommentar verschlucken, wodurch `document.getElementById(...)` `null` lieferte und das gesamte Formular-JavaScript (inkl. Dropdown-Umschaltung) mit einer `TypeError` abbrach, bevor es initialisiert war. Kommentar auf `{% comment %}...{% endcomment %}` umgestellt
+### Fixed
+- After selecting the system type, the form no longer showed any further fields: the explanatory comment added above the `json_script` tags with the XSS fix (v1.4.1) used the multi-line `{# ... #}` syntax, which Django only supports on a single line. The comment was therefore rendered literally into the page; the `</` sequence in it made the browser swallow the directly following `<script id="ng-funktionen-data">` tag as an invalid comment, so `document.getElementById(...)` returned `null` and the whole form JavaScript (incl. drop-down switching) aborted with a `TypeError` before it was initialised. Changed the comment to `{% comment %}...{% endcomment %}`
 
 ## [1.4.3] - 2026-08-02
 
-### Sicherheit
-- Race Condition bei der Namensvergabe entschärft: Das Plugin legt nie selbst ein Objekt an, sondern leitet mit vorausgefülltem `?name=...` zur NetBox-Erstellungsseite weiter, die der Nutzer separat (ggf. Minuten später) ausfüllt — zwei gleichzeitige Generierungen konnten bisher denselben Namensvorschlag erhalten. Neues Modell `ReservedName` (Unique-Constraint, 10-Minuten-TTL) reserviert generierte Namen atomar: der Normalfall wird proaktiv verhindert (Reservierungen fließen in die Kollisionsprüfung ein), eine echte gleichzeitige Kollision wird über den DB-Constraint abgefangen und dem Nutzer mit Aufforderung zum erneuten Versuch gemeldet. Gilt für alle auto-nummerierten Typen (Netzwerkgerät/Server/PC/VM); Notebook-Namen sind deterministisch und daher nicht betroffen. Live gegen den Container verifiziert (Normalfall, erzwungene Kollision, TTL-Ablauf)
+### Security
+- Mitigated a race condition in name assignment: the plugin never creates an object itself but redirects with a prefilled `?name=...` to the NetBox creation page, which the user fills in separately (possibly minutes later) — two simultaneous generations could so far get the same name suggestion. A new model `ReservedName` (unique constraint, 10-minute TTL) reserves generated names atomically: the normal case is prevented proactively (reservations are included in the collision check), a real simultaneous collision is caught by the DB constraint and reported to the user with a request to try again. Applies to all auto-numbered types (network device/server/PC/VM); notebook names are deterministic and therefore not affected. Verified live against the container (normal case, forced collision, TTL expiry)
 
 ## [1.4.2] - 2026-08-01
 
-### Sicherheit
-- **Git-Historie bereinigt**: Der in CRITICAL-01 (`SECURITY-ANALYSE-2026-08-01.md`) dokumentierte private SSH-Schlüssel (`ssh_carstenviell`/`ssh_carstenviell.pub`, ursprünglich in einem Commit von 2026-03-14 versehentlich eingecheckt) wurde per `git filter-repo` aus **jedem** Commit der Historie entfernt und die bereinigte Historie per Force-Push auf `main` sowie alle betroffenen Release-Tags (`v1.3.0`–`v1.4.1`) angewendet. Commit-Hashes ab dem betroffenen Commit haben sich dadurch geändert (`v1.1.0`–`v1.2.1` unverändert, da vor der Einführung des Schlüssels).
-- **Wichtig für bestehende Klone/Forks**: Ein `git pull` auf einem alten Klon führt zu divergierender Historie. Empfehlung: Repository neu klonen (`git clone`), lokale Änderungen vorher sichern. GitHubs eigene Caches/Forks/PR-Referenzen auf die alten Commits sind von dieser Bereinigung nicht erfasst — falls relevant, GitHub Support kontaktieren.
-- Der exponierte Schlüssel gilt unabhängig von dieser Bereinigung weiterhin als kompromittiert und sollte, falls noch nicht geschehen, umgehend rotiert/widerrufen werden.
+### Security
+- **Git history cleaned**: the private SSH key documented in CRITICAL-01 (`SECURITY-ANALYSE-2026-08-01.md`) (`ssh_carstenviell`/`ssh_carstenviell.pub`, accidentally committed on 2026-03-14) was removed from **every** commit of the history with `git filter-repo`, and the cleaned history was force-pushed to `main` and all affected release tags (`v1.3.0`–`v1.4.1`). Commit hashes from the affected commit on have changed as a result (`v1.1.0`–`v1.2.1` unchanged, as they predate the key).
+- **Important for existing clones/forks**: a `git pull` on an old clone leads to a diverging history. Recommendation: clone the repository again (`git clone`), back up local changes first. GitHub's own caches/forks/PR references to the old commits are not covered by this cleanup — if relevant, contact GitHub Support.
+- Regardless of this cleanup, the exposed key is still considered compromised and should be rotated/revoked immediately if not done yet.
 
 ## [1.4.1] - 2026-08-01
 
-### Sicherheit
-- Stored XSS behoben: Die JSON-Konfiguration für den Name-Generator wurde per `json.dumps()` + `|safe` in einen `<script>`-Block gerendert, wodurch ein `beschreibung`-Feld (z. B. bei `NetzwerkgeraetFunktion`) mit einer `</script>`-Sequenz aus dem Skript-Block ausbrechen konnte (Session-Kompromittierung jedes Nutzers, der die Startseite öffnet, ausgelöst von einem Nutzer mit deutlich geringerem Privileg). Template nutzt jetzt Djangos `|json_script`-Filter, der HTML-sicher escaped
-- Defense in Depth: `beschreibung`-Felder aller sechs Konfigurationsmodelle (`Standort`, `NetzwerkgeraetTyp`, `NetzwerkgeraetFunktion`, `ServerZweck`, `VmBereich`, `VmFunktion`) lassen die Zeichen `<`/`>` nicht mehr zu
-- `NameGeneratorView` prüfte bisher nur Login, keine Berechtigung, und lieferte dadurch jedem eingeloggten Nutzer die vollständige Rack-/Standort-Topologie sowie (indirekt) den Geräte-/VM-Namensbestand. Erfordert jetzt `dcim.add_device` und `virtualization.add_virtualmachine`; die Rack-Liste wird zusätzlich auf `.restrict(user, 'view')` gefiltert
+### Security
+- Fixed stored XSS: the JSON configuration for the name generator was rendered via `json.dumps()` + `|safe` into a `<script>` block, so a `beschreibung` field (e.g. of `NetzwerkgeraetFunktion`) containing a `</script>` sequence could break out of the script block (session compromise of every user opening the start page, triggered by a user with much lower privileges). The template now uses Django's `|json_script` filter, which escapes HTML-safely
+- Defense in depth: the `beschreibung` fields of all six configuration models (`Standort`, `NetzwerkgeraetTyp`, `NetzwerkgeraetFunktion`, `ServerZweck`, `VmBereich`, `VmFunktion`) no longer allow the characters `<`/`>`
+- `NameGeneratorView` so far only checked login, no permission, and therefore delivered the complete rack/site topology and (indirectly) the device/VM name inventory to every logged-in user. It now requires `dcim.add_device` and `virtualization.add_virtualmachine`; the rack list is additionally filtered with `.restrict(user, 'view')`
 
-### Bekannt / zurückgestellt
-- Race Condition bei der Namensvergabe (TOCTOU zwischen Namensvorschlag und tatsächlicher Objekterstellung durch den Nutzer) bewusst nicht behoben — erfordert eine Architekturentscheidung (z. B. sofortige Platzhalter-Objekterstellung), siehe `SECURITY-ANALYSE-2026-08-01.md`
+### Known / deferred
+- Race condition in name assignment (TOCTOU between the name suggestion and the actual object creation by the user) deliberately not fixed — requires an architecture decision (e.g. creating a placeholder object immediately), see `SECURITY-ANALYSE-2026-08-01.md`
 
 ## [1.4.0] - 2026-07-17
 
-### Neu
-- Konfigurierbare Namensregeln über `NamierungsKonfiguration`: maximale Länge, Anzahl Zählerstellen, Zählstrategie pro Systemtyp
+### Added
+- Configurable naming rules via `NamierungsKonfiguration`: maximum length, number of counter digits, counting strategy per system type
 
 ## [1.3.1] - 2026-03-17
 
-### Behoben
-- `struct.error` beim Öffnen von `/core/plugins/` durch leere `.mo`-Übersetzungsdatei
+### Fixed
+- `struct.error` when opening `/core/plugins/` caused by an empty `.mo` translation file
 
 ## [1.3.0] - 2026-03-14
 
-### Geändert
-- UX-Verbesserungen am Namensgenerator-Formular
+### Changed
+- UX improvements to the name generator form
 
 ## [1.2.1] - 2026-03-14
 
-### Behoben
-- `SerializerNotFound`-Fehler beim Löschen von Objekten (fehlende API-Serializer für NetBoxModel-Changelog)
+### Fixed
+- `SerializerNotFound` error when deleting objects (missing API serializers for the NetBoxModel changelog)
 
 ## [1.2.0] - 2026-03-14
 
-### Neu
-- "Generate Name & Add"-Button auf den Device- und VM-Listenansichten
+### Added
+- "Generate Name & Add" button on the device and VM list views
 
 ## [1.1.1] - 2026-03-14
 
-### Behoben
-- Migrations-Abhängigkeit korrigiert für breitere NetBox-4.5.x-Kompatibilität
+### Fixed
+- Corrected a migration dependency for broader NetBox 4.5.x compatibility
 
 ## [1.1.0] - 2026-03-13
 
-### Neu
-- Vollständige Mehrsprachigkeit (Deutsch/Englisch) inkl. zweisprachigem README
-- Lizenz- und URL-Metadaten in `pyproject.toml`
+### Added
+- Full multilingual support (German/English) incl. a bilingual README
+- License and URL metadata in `pyproject.toml`
 
 ## [1.0.0] - 2026-03-12
 
-### Neu
-- Initiale Version: automatisierte, regelkonforme Namensvergabe für Netzwerkgeräte, Server, PCs, Notebooks und VMs
-- DB-verwaltete Parameter (Standorte, Gerätetypen/-funktionen, Server-Zwecke, VM-Bereiche/-Funktionen) mit eigener CRUD-UI
+### Added
+- Initial version: automated, policy-compliant name assignment for network devices, servers, PCs, notebooks and VMs
+- DB-managed parameters (sites, device types/functions, server purposes, VM areas/functions) with their own CRUD UI
